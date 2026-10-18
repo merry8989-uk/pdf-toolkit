@@ -181,7 +181,9 @@ function chrome(active) {
 /* ---------- tool page builder ---------- */
 export function mountTool(cfg) {
   const { header, footer } = chrome(cfg.id);
-  const main = document.createElement("main");
+  let main = document.getElementById("app");
+  const isNew = !main;
+  if (isNew) { main = document.createElement("main"); main.id = "app"; }
 
   main.innerHTML = `
     <div class="tool-head">
@@ -212,7 +214,7 @@ export function mountTool(cfg) {
     ${cfg.help ? `<div class="panel"><h3>How it works</h3>${cfg.help}</div>` : ""}
     ${cfg.faq ? `<h2>FAQ</h2>${cfg.faq.map(([q, a]) => `<details class="faq"><summary>${q}</summary><div class="body">${a}</div></details>`).join("")}` : ""}
   `;
-  document.body.insertBefore(main, footer);
+  if (isNew) document.body.insertBefore(main, footer);
 
   const $ = (s) => main.querySelector(s);
   const drop = $("#drop"), input = $("#file"), filelist = $("#filelist"),
