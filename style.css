@@ -211,4 +211,31 @@ details.faq .body{padding:0 16px 14px;font-size:13.5px;color:var(--dim);}
   .card{padding:13px;}
   .card .d{display:none;}
 }
+/* ---------- nav dropdowns ---------- */
+.dd{position:relative;}
+.dd-btn{background:none;border:1px solid transparent;color:var(--dim);font:inherit;font-size:14px;cursor:pointer;padding:6px 9px;border-radius:8px;display:inline-flex;align-items:center;gap:5px;}
+.dd-btn:hover{color:var(--text);background:var(--surface-2);}
+.dd.open .dd-btn{color:var(--text);background:var(--surface-2);border-color:var(--line);}
+.dd .caret{font-size:10px;opacity:.7;}
+.dd-menu{position:absolute;top:calc(100% + 8px);left:0;min-width:660px;max-width:92vw;background:var(--surface);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow);padding:16px;display:none;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:16px;z-index:60;}
+.dd.open .dd-menu{display:grid;}
+.dd-group-title{font-family:var(--mono);font-size:10px;letter-spacing:1.2px;text-transform:uppercase;color:var(--brand);margin-bottom:8px;}
+.dd-group a{display:block;font-size:13px;color:var(--text);padding:4px 7px;border-radius:6px;}
+.dd-group a:hover{background:var(--surface-2);text-decoration:none;color:var(--accent);}
+
+/* ---------- grouped sections ---------- */
+.cat{margin-top:44px;}
+.cat-head h2{font-size:26px;}
+.cat-head p{font-size:14px;margin-top:4px;}
+h3.grp{font-size:12px;font-family:var(--mono);letter-spacing:1.4px;text-transform:uppercase;color:var(--text-dim);margin:26px 0 12px;padding-bottom:7px;border-bottom:1px solid var(--line);}
+.jump{display:flex;gap:8px;flex-wrap:wrap;margin:14px 0 4px;}
+.jump a{font-family:var(--mono);font-size:11px;border:1px solid var(--line);border-radius:999px;padding:4px 12px;color:var(--text-dim);}
+.jump a:hover{color:var(--text);border-color:var(--line-2);text-decoration:none;}
+.count{font-family:var(--mono);font-size:11px;color:var(--text-dim);}
+
+@media (max-width:900px){
+  .dd-menu{position:fixed;left:8px;right:8px;top:auto;min-width:0;max-height:72vh;overflow:auto;grid-template-columns:1fr 1fr;}
+}
+@media (max-width:560px){ .dd-menu{grid-template-columns:1fr;} }
+
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important;}}

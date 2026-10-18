@@ -22,6 +22,7 @@
   <div class="grid">
     <div class="card"><div class="t">pdf-lib</div><div class="d">Reads, edits and writes PDF structure — merging, splitting, rotating, cropping, drawing text and images, forms, metadata and encryption. Pure JavaScript.</div></div>
     <div class="card"><div class="t">pdf.js</div><div class="d">Renders pages to a canvas so we can show thumbnails, turn pages into images, and read out the text layer. The same engine behind Firefox's PDF viewer.</div></div>
+    <div class="card"><div class="t">Tesseract (WASM)</div><div class="d">Recognises text in scans for the OCR tool, running in a background worker with its English language data bundled with the site.</div></div>
     <div class="card"><div class="t">Web Crypto</div><div class="d">Generates the random keys, salts and initialisation vectors used when you password-protect a PDF with AES-256.</div></div>
     <div class="card"><div class="t">A tiny ZIP writer</div><div class="d">When a tool produces several files, they are bundled into a ZIP locally — with about a hundred lines of code and no dependency.</div></div>
   </div>
@@ -33,7 +34,7 @@
 
   <h2>What a browser cannot do (yet)</h2>
   <div class="panel">
-    <p>High-fidelity conversion between Office formats (Word, Excel, PowerPoint) and PDF needs a desktop-class layout engine such as LibreOffice, which does not run in a browser tab. Those tools are deliberately not offered here rather than offered badly. Everything else — the day-to-day PDF work — runs client-side.</p>
+    <p>High-fidelity conversion between Office formats (Word, Excel, PowerPoint) and PDF needs a desktop-class layout engine such as LibreOffice, which does not run in a browser tab. AI summarising and translation need a model server. Those are deliberately not offered here rather than offered badly. Everything else — the day-to-day PDF and image work, including OCR — runs client-side.</p>
   </div>
 
   <h2>Questions</h2>

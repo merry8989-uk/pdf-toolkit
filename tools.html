@@ -3,43 +3,39 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>All PDF tools — PDF Toolkit</title>
-<meta name="description" content="The complete list of browser-based PDF tools: merge, split, organise, rotate, crop, watermark, page numbers, convert, protect and unlock.">
+<title>All PDF &amp; image tools — PDF Toolkit</title>
+<meta name="description" content="The complete list of browser-based tools: merge, split, compress, organise, rotate, crop, watermark, page numbers, sign, redact, OCR, convert, protect and photo tools.">
 <link rel="canonical" href="https://merry8989-uk.github.io/pdf-toolkit/tools.html">
 <link rel="icon" href="./logo.svg" type="image/svg+xml">
 <link rel="stylesheet" href="./style.css">
 </head>
 <body>
 <main>
-  <div class="tool-head"><h1>All tools</h1><p class="lead">Twenty tools that run entirely in your browser. Pick one — your file stays on your device.</p></div>
-  <div id="sections"></div>
+  <div class="tool-head">
+    <h1>All tools</h1>
+    <p class="lead"><span id="toolcount">60+</span> tools that run entirely in your browser. Pick one — your file stays on your device.</p>
+  </div>
+  <div class="jump" id="jump"></div>
+  <div id="all"></div>
 </main>
 <script type="module">
-  import { siteChrome } from "./app.js";
+  import { siteChrome, REGISTRY, ALL_TOOLS } from "./app.js";
   siteChrome();
-  const CATS = [
-    ["Organise pages", ["merge","split","remove-pages","extract-pages","organize","rotate","crop","pages-per-sheet","insert-pages","duplicate-pages","resize"]],
-    ["Edit & annotate", ["page-numbers","watermark","metadata","flatten"]],
-    ["Convert", ["images-to-pdf","pdf-to-jpg","extract-text"]],
-    ["Protect", ["protect","unlock"]],
-  ];
-  const META = {
-    merge:["Merge PDF","Combine PDFs in any order"],split:["Split PDF","Pull out pages or split into files"],
-    "remove-pages":["Remove pages","Delete pages and keep the rest"],"extract-pages":["Extract pages","Save selected pages as a new PDF"],
-    organize:["Organise PDF","Reorder pages"],rotate:["Rotate PDF","Turn pages 90°/180°/270°"],
-    crop:["Crop PDF","Trim the visible margins"],"pages-per-sheet":["Pages per sheet","2 or 4 pages on one sheet"],
-    "insert-pages":["Insert blank pages","Add blank pages anywhere"],"duplicate-pages":["Duplicate pages","Copy pages within the file"],
-    resize:["Resize pages","Scale pages to a paper size"],"page-numbers":["Page numbers","Stamp numbering on every page"],
-    watermark:["Watermark","Add a text or image stamp"],metadata:["Edit metadata","Set title, author, keywords"],
-    flatten:["Flatten form","Bake form fields into the page"],"images-to-pdf":["Images to PDF","JPG / PNG / WebP into one PDF"],
-    "pdf-to-jpg":["PDF to JPG","Render pages to images"],"extract-text":["Extract text","Read selectable text out of a PDF"],
-    protect:["Protect PDF","Encrypt with a password"],unlock:["Unlock PDF","Remove a known password"],
-  };
-  document.getElementById("sections").innerHTML = CATS.map(([name, ids]) =>
-    `<h2>${name}</h2><div class="grid">` + ids.map(id =>
-      `<a class="card" href="./${id}.html"><div class="t">${META[id][0]}</div><div class="d">${META[id][1]}</div></a>`
-    ).join("") + `</div>`
+  document.getElementById("toolcount").textContent = ALL_TOOLS.length;
+
+  document.getElementById("jump").innerHTML = REGISTRY.flatMap((c) =>
+    c.groups.map((g) => `<a href="#g-${c.id}-${g.name.replace(/[^a-z0-9]+/gi, "-").toLowerCase()}">${g.name} (${g.tools.length})</a>`)
   ).join("");
+
+  document.getElementById("all").innerHTML = REGISTRY.map((cat) => `
+    <section class="cat" id="cat-${cat.id}">
+      <div class="cat-head"><h2>${cat.icon} ${cat.name} tools</h2><p>${cat.tagline}</p></div>
+      ${cat.groups.map((g) => `
+        <h3 class="grp" id="g-${cat.id}-${g.name.replace(/[^a-z0-9]+/gi, "-").toLowerCase()}">${g.name} <span class="count">${g.tools.length}</span></h3>
+        <div class="grid">
+          ${g.tools.map((t) => `<a class="card" href="./${t[0]}.html"><div class="t"><span class="ic">${g.icon}</span>${t[1]}</div><div class="d">${t[2]}</div></a>`).join("")}
+        </div>`).join("")}
+    </section>`).join("");
 </script>
 </body>
 </html>

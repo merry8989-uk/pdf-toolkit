@@ -3,38 +3,38 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>PDF Toolkit — free PDF tools that never upload your files</title>
-<meta name="description" content="Merge, split, rotate, compress, watermark, protect and convert PDFs entirely in your browser. No uploads, no accounts, no server. Free and private.">
+<title>PDF Toolkit — free PDF &amp; image tools that never upload your files</title>
+<meta name="description" content="Merge, split, compress, rotate, watermark, sign, redact, OCR and convert PDFs — plus image tools. 60+ tools that run entirely in your browser. No uploads, no accounts.">
 <link rel="canonical" href="https://merry8989-uk.github.io/pdf-toolkit/">
 <meta property="og:type" content="website">
-<meta property="og:title" content="PDF Toolkit — free PDF tools that never upload your files">
-<meta property="og:description" content="Every PDF tool runs in your browser. Your files never leave your device.">
+<meta property="og:title" content="PDF Toolkit — free PDF &amp; image tools that never upload your files">
+<meta property="og:description" content="60+ PDF and image tools that run in your browser. Your files never leave your device.">
 <link rel="icon" href="./logo.svg" type="image/svg+xml">
 <link rel="stylesheet" href="./style.css">
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"SoftwareApplication","name":"PDF Toolkit",
 "applicationCategory":"UtilitiesApplication","operatingSystem":"Any (runs in browser)",
-"description":"Free browser-based PDF tools. Files are processed on-device and never uploaded.",
+"description":"Free browser-based PDF and image tools. Files are processed on-device and never uploaded.",
 "offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}
 </script>
 </head>
 <body>
 <main>
   <section class="hero">
-    <span class="pill">100% client-side</span>
-    <h1>Every PDF tool you need — without the upload</h1>
-    <p class="lead">Merge, split, rotate, watermark, protect, convert and more. Everything runs inside your browser tab with WebAssembly, so your documents never leave your device. No accounts. No file-size servers. No waiting.</p>
+    <span class="pill">100% client-side · <span id="toolcount">60+</span> tools</span>
+    <h1>Every PDF and image tool you need — without the upload</h1>
+    <p class="lead">Merge, split, compress, organise, rotate, watermark, sign, redact, OCR, convert, protect — and a full set of photo tools. Everything runs inside your browser tab with WebAssembly, so your documents never leave your device. No accounts. No file-size servers. No waiting.</p>
     <div class="row" style="margin-top:20px">
-      <a class="btn" href="#tools">Browse tools</a>
+      <a class="btn" href="#all">Browse all tools</a>
       <a class="btn ghost" href="./guide.html">How it works</a>
     </div>
+    <div class="jump" id="jump"></div>
   </section>
 
-  <h2 id="tools">All tools</h2>
-  <div class="grid" id="grid"></div>
+  <div id="all"></div>
 
-  <section style="margin-top:44px">
-    <h2>Why a browser-only PDF suite is better for you</h2>
+  <section style="margin-top:56px">
+    <h2>Why a browser-only toolkit is better for you</h2>
     <div class="grid">
       <div class="card"><div class="t"><span class="ic">🔒</span>Private by architecture</div><div class="d">Most online PDF sites upload your file to their servers. Here there is no server to upload to — the code runs in your tab. Open the Network panel and watch: nothing goes out.</div></div>
       <div class="card"><div class="t"><span class="ic">⚡</span>Instant</div><div class="d">No upload, no queue, no download round-trip. The moment you click, your own CPU does the work.</div></div>
@@ -47,20 +47,32 @@
     <h2>Common questions</h2>
     <details class="faq"><summary>Are my files really not uploaded?</summary><div class="body">Correct. The tools are plain HTML, CSS and JavaScript served as static files. Your file is read with the browser's File API into memory, processed there, and handed back as a download. There is no backend endpoint for files to reach.</div></details>
     <details class="faq"><summary>Is there a file-size limit?</summary><div class="body">There is no server limit. The practical ceiling is your device's available memory — very large PDFs may be slow on low-RAM phones. Splitting big documents first usually helps.</div></details>
-    <details class="faq"><summary>Which tools need a server and are not here?</summary><div class="body">High-fidelity Office⇄PDF conversion (Word/Excel/PowerPoint) needs a desktop-class converter that cannot run in a browser tab, so it is out of scope for this client-side suite.</div></details>
+    <details class="faq"><summary>Which tools are not here, and why?</summary><div class="body">High-fidelity Office⇄PDF conversion (Word/Excel/PowerPoint) and AI summarising/translation need a desktop-class engine or a model server, neither of which can run in a browser tab. They are left out rather than offered badly.</div></details>
+    <details class="faq"><summary>How does OCR work without a server?</summary><div class="body">The OCR tool uses Tesseract, compiled to WebAssembly, running in a background worker in your browser. The language data is bundled with the site, so even OCR happens offline.</div></details>
   </section>
 </main>
 
 <script type="module">
-  import { siteChrome, TOOL_LIST } from "./app.js";
+  import { siteChrome, REGISTRY, ALL_TOOLS } from "./app.js";
   siteChrome();
-  const ICONS = {merge:"⇉",split:"✂", "remove-pages":"🗑", "extract-pages":"⤢", organize:"⇅", rotate:"⟳",
-    "page-numbers":"№", watermark:"💧", "images-to-pdf":"🖼", "pdf-to-jpg":"🏞", "extract-text":"T",
-    crop:"⬚", "pages-per-sheet":"▦", "insert-pages":"＋", "duplicate-pages":"⧉", resize:"⤡",
-    metadata:"✎", flatten:"▤", protect:"🔐", unlock:"🔓"};
-  document.getElementById("grid").innerHTML = TOOL_LIST.map(([id, t, d]) =>
-    `<a class="card" href="./${id}.html"><div class="t"><span class="ic">${ICONS[id]||"▤"}</span>${t}</div><div class="d">${d}</div></a>`
+  document.getElementById("toolcount").textContent = ALL_TOOLS.length;
+
+  document.getElementById("jump").innerHTML = REGISTRY.map((c) =>
+    `<a href="#cat-${c.id}">${c.icon} ${c.name} (${c.groups.reduce((n, g) => n + g.tools.length, 0)})</a>`
   ).join("");
+
+  document.getElementById("all").innerHTML = REGISTRY.map((cat) => `
+    <section class="cat" id="cat-${cat.id}">
+      <div class="cat-head">
+        <h2>${cat.icon} ${cat.name} tools</h2>
+        <p>${cat.tagline}</p>
+      </div>
+      ${cat.groups.map((g) => `
+        <h3 class="grp">${g.name}</h3>
+        <div class="grid">
+          ${g.tools.map((t) => `<a class="card" href="./${t[0]}.html"><div class="t"><span class="ic">${g.icon}</span>${t[1]}</div><div class="d">${t[2]}</div></a>`).join("")}
+        </div>`).join("")}
+    </section>`).join("");
 </script>
 </body>
 </html>

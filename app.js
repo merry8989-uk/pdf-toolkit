@@ -3,7 +3,8 @@
    Everything runs in the browser. No uploads, no server, no CDN.
    ============================================================ */
 import { createZip } from "./zip.js";
-export { createZip };
+import { REGISTRY, ALL_TOOLS } from "./registry.js";
+export { createZip, REGISTRY, ALL_TOOLS };
 
 /* ---------- lazy library loaders (imported only when needed) ---------- */
 let _pdfLib = null;
@@ -117,45 +118,98 @@ export async function thumbnails(file, container, opts = {}) {
   return { items, numPages: doc.numPages };
 }
 
-/* ---------- site chrome ---------- */
-const TOOLS = [
-  ["merge", "Merge PDF", "Combine PDFs in any order"],
-  ["split", "Split PDF", "Pull out pages or split into files"],
-  ["remove-pages", "Remove pages", "Delete pages and keep the rest"],
-  ["extract-pages", "Extract pages", "Save selected pages as a new PDF"],
-  ["organize", "Organise PDF", "Reorder pages by drag-free picking"],
-  ["rotate", "Rotate PDF", "Turn pages 90° / 180° / 270°"],
-  ["page-numbers", "Page numbers", "Stamp numbering on every page"],
-  ["watermark", "Watermark", "Add a text watermark across every page"],
-  ["images-to-pdf", "Images to PDF", "JPG / PNG / WebP into one PDF"],
-  ["pdf-to-jpg", "PDF to JPG", "Render pages to images"],
-  ["extract-text", "Extract text", "Read selectable text out of a PDF"],
-  ["crop", "Crop PDF", "Trim the visible margins"],
-  ["pages-per-sheet", "Pages per sheet", "2 or 4 pages on one sheet"],
-  ["insert-pages", "Insert blank pages", "Add blank pages anywhere"],
-  ["duplicate-pages", "Duplicate pages", "Copy pages within the file"],
-  ["resize", "Resize pages", "Scale pages to a paper size"],
-  ["metadata", "Edit metadata", "Set title, author, keywords"],
-  ["flatten", "Flatten form", "Bake form fields into the page"],
-  ["protect", "Protect PDF", "Encrypt with a password"],
-  ["unlock", "Unlock PDF", "Remove a known password"],
+/* ---------- image helpers (used by the Photos tools) ---------- */
+export async function fileToImage(file) {
+  const url = URL.createObjectURL(file);
+  const img = new Image();
+  try {
+    await new Promise((res, rej) => {
+      img.onload = res;
+      img.onerror = () => rej(new Error("That file could not be read as an image."));
+      img.src = url;
+    });
+    return img;
+  } finally {
+    setTimeout(() => URL.revokeObjectURL(url), 15000);
+  }
+}
+
+export function canvasOf(w, h) {
+  const c = document.createElement("canvas");
+  c.width = Math.max(1, Math.round(w));
+  c.height = Math.max(1, Math.round(h));
+  return c;
+}
+
+export function canvasBlob(canvas, mime = "image/png", quality = 0.92) {
+  return new Promise((res) => canvas.toBlob(res, mime, quality));
+}
+
+export function hexToRgb(hex) {
+  const m = /^#?([0-9a-f]{6})$/i.exec(hex || "");
+  if (!m) return { r: 0, g: 0, b: 0 };
+  const n = parseInt(m[1], 16);
+  return { r: (n >> 16) & 255, g: (n >> 8) & 255, b: n & 255 };
+}
+
+/** Position a box of w×h inside W×H for an anchor like "bottom-right". */
+export function anchorXY(anchor, W, H, w, h, margin = 24) {
+  const a = anchor || "center";
+  let x, y;
+  if (a.includes("left")) x = margin;
+  else if (a.includes("right")) x = W - w - margin;
+  else x = (W - w) / 2;
+  if (a.startsWith("top")) y = margin;
+  else if (a.startsWith("bottom")) y = H - h - margin;
+  else y = (H - h) / 2;
+  return { x, y };
+}
+
+export const ANCHORS = [
+  ["top-left", "Top left"], ["top-center", "Top centre"], ["top-right", "Top right"],
+  ["middle-left", "Middle left"], ["center", "Centre"], ["middle-right", "Middle right"],
+  ["bottom-left", "Bottom left"], ["bottom-center", "Bottom centre"], ["bottom-right", "Bottom right"],
 ];
 
+/* ---------- site chrome ---------- */
 function chrome(active) {
   const theme = localStorage.getItem("theme");
   if (theme) document.documentElement.dataset.theme = theme;
 
   const header = document.createElement("header");
   header.className = "site";
+  const ddHtml = REGISTRY.map((cat) => `
+    <div class="dd">
+      <button class="dd-btn" aria-haspopup="true" aria-expanded="false">${cat.icon} ${cat.name} <span class="caret">▾</span></button>
+      <div class="dd-menu">
+        ${cat.groups.map((g) => `
+          <div class="dd-group">
+            <div class="dd-group-title">${g.name}</div>
+            ${g.tools.map((t) => `<a href="./${t[0]}.html">${t[1]}</a>`).join("")}
+          </div>`).join("")}
+      </div>
+    </div>`).join("");
   header.innerHTML = `
     <div class="bar">
       <a class="logo" href="./index.html"><span class="mark"></span>PDF&nbsp;Toolkit</a>
       <nav>
         <a href="./tools.html">All tools</a>
+        ${ddHtml}
         <a href="./guide.html">Guide</a>
         <button class="theme-btn" title="Toggle theme" aria-label="Toggle theme">◐</button>
       </nav>
     </div>`;
+  header.querySelectorAll(".dd-btn").forEach((btn) => {
+    btn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const dd = btn.parentElement;
+      const wasOpen = dd.classList.contains("open");
+      header.querySelectorAll(".dd").forEach((d) => d.classList.remove("open"));
+      if (!wasOpen) dd.classList.add("open");
+      btn.setAttribute("aria-expanded", String(!wasOpen));
+    });
+  });
+  document.addEventListener("click", () => header.querySelectorAll(".dd").forEach((d) => d.classList.remove("open")));
   header.querySelector(".theme-btn").addEventListener("click", () => {
     const cur = document.documentElement.dataset.theme ||
       (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
@@ -271,6 +325,7 @@ export function mountTool(cfg) {
     opts[f.name] = el;
   }
   if (!cfg.options || !cfg.options.length) $("#p-opts").style.display = "none";
+  if (cfg.noFile) $("#p-drop").style.display = "none";
 
   function readOpts() {
     const o = {};
@@ -293,9 +348,10 @@ export function mountTool(cfg) {
     downloadZip(entries, name = "output.zip") { download(createZip(entries), name, "application/zip"); },
     toast,
     loadPdfLib, loadPdfJs, openDocument, parseRanges, thumbnails, fmtSize,
+    fileToImage, canvasOf, canvasBlob, hexToRgb, anchorXY, ANCHORS,
     progress(p) { progress.classList.add("on"); bar.style.width = Math.max(0, Math.min(1, p)) * 100 + "%"; },
     progressDone() { bar.style.width = "100%"; setTimeout(() => { progress.classList.remove("on"); bar.style.width = "0"; }, 500); },
-    setBusy(b, label) { go.disabled = b || !files.length; if (label) go.textContent = label; },
+    setBusy(b, label) { go.disabled = b || (!cfg.noFile && !files.length); if (label) go.textContent = label; },
   };
 
   function renderFiles() {
@@ -318,7 +374,7 @@ export function mountTool(cfg) {
       li.appendChild(x);
       filelist.appendChild(li);
     });
-    go.disabled = !files.length;
+    go.disabled = cfg.noFile ? false : !files.length;
     ctx.files = files;
     if (cfg.onFiles) Promise.resolve(cfg.onFiles(ctx)).catch((e) => toast(e.message || String(e), true));
   }
@@ -343,7 +399,7 @@ export function mountTool(cfg) {
   });
 
   go.addEventListener("click", async () => {
-    if (!files.length) return;
+    if (!cfg.noFile && !files.length) return;
     out.innerHTML = "";
     progress.classList.add("on");
     bar.style.width = "2%";
@@ -367,5 +423,4 @@ export function mountTool(cfg) {
 /* inject site header/footer on content pages (landing, tools, guide, legal) */
 export function siteChrome() { return chrome(); }
 
-/* expose the tool registry for the landing page */
-export const TOOL_LIST = TOOLS;
+/* expose the image/positioning helpers on ctx as well */

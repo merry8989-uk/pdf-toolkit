@@ -7,22 +7,63 @@
   <url><loc>https://merry8989-uk.github.io/pdf-toolkit/terms.html</loc></url>
   <url><loc>https://merry8989-uk.github.io/pdf-toolkit/merge.html</loc></url>
   <url><loc>https://merry8989-uk.github.io/pdf-toolkit/split.html</loc></url>
+  <url><loc>https://merry8989-uk.github.io/pdf-toolkit/split-by-size.html</loc></url>
+  <url><loc>https://merry8989-uk.github.io/pdf-toolkit/split-by-bookmarks.html</loc></url>
   <url><loc>https://merry8989-uk.github.io/pdf-toolkit/remove-pages.html</loc></url>
   <url><loc>https://merry8989-uk.github.io/pdf-toolkit/extract-pages.html</loc></url>
   <url><loc>https://merry8989-uk.github.io/pdf-toolkit/organize.html</loc></url>
   <url><loc>https://merry8989-uk.github.io/pdf-toolkit/rotate.html</loc></url>
-  <url><loc>https://merry8989-uk.github.io/pdf-toolkit/page-numbers.html</loc></url>
-  <url><loc>https://merry8989-uk.github.io/pdf-toolkit/watermark.html</loc></url>
-  <url><loc>https://merry8989-uk.github.io/pdf-toolkit/images-to-pdf.html</loc></url>
-  <url><loc>https://merry8989-uk.github.io/pdf-toolkit/pdf-to-jpg.html</loc></url>
-  <url><loc>https://merry8989-uk.github.io/pdf-toolkit/extract-text.html</loc></url>
-  <url><loc>https://merry8989-uk.github.io/pdf-toolkit/crop.html</loc></url>
-  <url><loc>https://merry8989-uk.github.io/pdf-toolkit/pages-per-sheet.html</loc></url>
+  <url><loc>https://merry8989-uk.github.io/pdf-toolkit/reverse-pages.html</loc></url>
+  <url><loc>https://merry8989-uk.github.io/pdf-toolkit/mix-interleave.html</loc></url>
   <url><loc>https://merry8989-uk.github.io/pdf-toolkit/insert-pages.html</loc></url>
   <url><loc>https://merry8989-uk.github.io/pdf-toolkit/duplicate-pages.html</loc></url>
+  <url><loc>https://merry8989-uk.github.io/pdf-toolkit/crop.html</loc></url>
   <url><loc>https://merry8989-uk.github.io/pdf-toolkit/resize.html</loc></url>
+  <url><loc>https://merry8989-uk.github.io/pdf-toolkit/pages-per-sheet.html</loc></url>
+  <url><loc>https://merry8989-uk.github.io/pdf-toolkit/booklet.html</loc></url>
+  <url><loc>https://merry8989-uk.github.io/pdf-toolkit/remove-blank-pages.html</loc></url>
+  <url><loc>https://merry8989-uk.github.io/pdf-toolkit/add-border.html</loc></url>
+  <url><loc>https://merry8989-uk.github.io/pdf-toolkit/compress.html</loc></url>
+  <url><loc>https://merry8989-uk.github.io/pdf-toolkit/repair.html</loc></url>
+  <url><loc>https://merry8989-uk.github.io/pdf-toolkit/grayscale.html</loc></url>
+  <url><loc>https://merry8989-uk.github.io/pdf-toolkit/invert-colors.html</loc></url>
+  <url><loc>https://merry8989-uk.github.io/pdf-toolkit/sanitize-metadata.html</loc></url>
+  <url><loc>https://merry8989-uk.github.io/pdf-toolkit/pdf-info.html</loc></url>
+  <url><loc>https://merry8989-uk.github.io/pdf-toolkit/images-to-pdf.html</loc></url>
+  <url><loc>https://merry8989-uk.github.io/pdf-toolkit/pdf-to-jpg.html</loc></url>
+  <url><loc>https://merry8989-uk.github.io/pdf-toolkit/text-to-pdf.html</loc></url>
+  <url><loc>https://merry8989-uk.github.io/pdf-toolkit/scan-to-pdf.html</loc></url>
+  <url><loc>https://merry8989-uk.github.io/pdf-toolkit/extract-text.html</loc></url>
+  <url><loc>https://merry8989-uk.github.io/pdf-toolkit/pdf-to-markdown.html</loc></url>
+  <url><loc>https://merry8989-uk.github.io/pdf-toolkit/page-numbers.html</loc></url>
+  <url><loc>https://merry8989-uk.github.io/pdf-toolkit/header-footer.html</loc></url>
+  <url><loc>https://merry8989-uk.github.io/pdf-toolkit/bates-numbering.html</loc></url>
+  <url><loc>https://merry8989-uk.github.io/pdf-toolkit/watermark.html</loc></url>
+  <url><loc>https://merry8989-uk.github.io/pdf-toolkit/watermark-image.html</loc></url>
+  <url><loc>https://merry8989-uk.github.io/pdf-toolkit/stamps.html</loc></url>
+  <url><loc>https://merry8989-uk.github.io/pdf-toolkit/annotate-text.html</loc></url>
+  <url><loc>https://merry8989-uk.github.io/pdf-toolkit/sign.html</loc></url>
+  <url><loc>https://merry8989-uk.github.io/pdf-toolkit/redact.html</loc></url>
   <url><loc>https://merry8989-uk.github.io/pdf-toolkit/metadata.html</loc></url>
+  <url><loc>https://merry8989-uk.github.io/pdf-toolkit/fill-form.html</loc></url>
   <url><loc>https://merry8989-uk.github.io/pdf-toolkit/flatten.html</loc></url>
+  <url><loc>https://merry8989-uk.github.io/pdf-toolkit/add-bookmarks.html</loc></url>
+  <url><loc>https://merry8989-uk.github.io/pdf-toolkit/add-attachments.html</loc></url>
+  <url><loc>https://merry8989-uk.github.io/pdf-toolkit/extract-attachments.html</loc></url>
+  <url><loc>https://merry8989-uk.github.io/pdf-toolkit/compare.html</loc></url>
   <url><loc>https://merry8989-uk.github.io/pdf-toolkit/protect.html</loc></url>
   <url><loc>https://merry8989-uk.github.io/pdf-toolkit/unlock.html</loc></url>
+  <url><loc>https://merry8989-uk.github.io/pdf-toolkit/ocr.html</loc></url>
+  <url><loc>https://merry8989-uk.github.io/pdf-toolkit/convert-image.html</loc></url>
+  <url><loc>https://merry8989-uk.github.io/pdf-toolkit/image-to-base64.html</loc></url>
+  <url><loc>https://merry8989-uk.github.io/pdf-toolkit/favicon.html</loc></url>
+  <url><loc>https://merry8989-uk.github.io/pdf-toolkit/compress-image.html</loc></url>
+  <url><loc>https://merry8989-uk.github.io/pdf-toolkit/resize-image.html</loc></url>
+  <url><loc>https://merry8989-uk.github.io/pdf-toolkit/crop-image.html</loc></url>
+  <url><loc>https://merry8989-uk.github.io/pdf-toolkit/rotate-image.html</loc></url>
+  <url><loc>https://merry8989-uk.github.io/pdf-toolkit/grayscale-image.html</loc></url>
+  <url><loc>https://merry8989-uk.github.io/pdf-toolkit/image-watermark.html</loc></url>
+  <url><loc>https://merry8989-uk.github.io/pdf-toolkit/add-text-to-image.html</loc></url>
+  <url><loc>https://merry8989-uk.github.io/pdf-toolkit/image-border.html</loc></url>
+  <url><loc>https://merry8989-uk.github.io/pdf-toolkit/collage.html</loc></url>
 </urlset>
