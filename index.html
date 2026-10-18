@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PDF Toolkit — free PDF tools that never upload your files</title>
+<meta name="description" content="Merge, split, rotate, compress, watermark, protect and convert PDFs entirely in your browser. No uploads, no accounts, no server. Free and private.">
+<link rel="canonical" href="https://merry8989-uk.github.io/pdf-toolkit/">
+<meta property="og:type" content="website">
+<meta property="og:title" content="PDF Toolkit — free PDF tools that never upload your files">
+<meta property="og:description" content="Every PDF tool runs in your browser. Your files never leave your device.">
+<link rel="icon" href="./logo.svg" type="image/svg+xml">
+<link rel="stylesheet" href="./style.css">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"SoftwareApplication","name":"PDF Toolkit",
+"applicationCategory":"UtilitiesApplication","operatingSystem":"Any (runs in browser)",
+"description":"Free browser-based PDF tools. Files are processed on-device and never uploaded.",
+"offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}
+</script>
+</head>
+<body>
+<main>
+  <section class="hero">
+    <span class="pill">100% client-side</span>
+    <h1>Every PDF tool you need — without the upload</h1>
+    <p class="lead">Merge, split, rotate, watermark, protect, convert and more. Everything runs inside your browser tab with WebAssembly, so your documents never leave your device. No accounts. No file-size servers. No waiting.</p>
+    <div class="row" style="margin-top:20px">
+      <a class="btn" href="#tools">Browse tools</a>
+      <a class="btn ghost" href="./guide.html">How it works</a>
+    </div>
+  </section>
+
+  <h2 id="tools">All tools</h2>
+  <div class="grid" id="grid"></div>
+
+  <section style="margin-top:44px">
+    <h2>Why a browser-only PDF suite is better for you</h2>
+    <div class="grid">
+      <div class="card"><div class="t"><span class="ic">🔒</span>Private by architecture</div><div class="d">Most online PDF sites upload your file to their servers. Here there is no server to upload to — the code runs in your tab. Open the Network panel and watch: nothing goes out.</div></div>
+      <div class="card"><div class="t"><span class="ic">⚡</span>Instant</div><div class="d">No upload, no queue, no download round-trip. The moment you click, your own CPU does the work.</div></div>
+      <div class="card"><div class="t"><span class="ic">🪶</span>Free, and it stays free</div><div class="d">There are no per-file server bills to cover, so there is no paywall and no watermark stamped onto your output.</div></div>
+      <div class="card"><div class="t"><span class="ic">🧩</span>Open and inspectable</div><div class="d">A static site with vendored libraries and a strict Content-Security-Policy. View source, read the code, verify the claim.</div></div>
+    </div>
+  </section>
+
+  <section style="margin-top:44px">
+    <h2>Common questions</h2>
+    <details class="faq"><summary>Are my files really not uploaded?</summary><div class="body">Correct. The tools are plain HTML, CSS and JavaScript served as static files. Your file is read with the browser's File API into memory, processed there, and handed back as a download. There is no backend endpoint for files to reach.</div></details>
+    <details class="faq"><summary>Is there a file-size limit?</summary><div class="body">There is no server limit. The practical ceiling is your device's available memory — very large PDFs may be slow on low-RAM phones. Splitting big documents first usually helps.</div></details>
+    <details class="faq"><summary>Which tools need a server and are not here?</summary><div class="body">High-fidelity Office⇄PDF conversion (Word/Excel/PowerPoint) needs a desktop-class converter that cannot run in a browser tab, so it is out of scope for this client-side suite.</div></details>
+  </section>
+</main>
+
+<script type="module">
+  import { siteChrome, TOOL_LIST } from "./app.js";
+  siteChrome();
+  const ICONS = {merge:"⇉",split:"✂", "remove-pages":"🗑", "extract-pages":"⤢", organize:"⇅", rotate:"⟳",
+    "page-numbers":"№", watermark:"💧", "images-to-pdf":"🖼", "pdf-to-jpg":"🏞", "extract-text":"T",
+    crop:"⬚", "pages-per-sheet":"▦", "insert-pages":"＋", "duplicate-pages":"⧉", resize:"⤡",
+    metadata:"✎", flatten:"▤", protect:"🔐", unlock:"🔓"};
+  document.getElementById("grid").innerHTML = TOOL_LIST.map(([id, t, d]) =>
+    `<a class="card" href="./${id}.html"><div class="t"><span class="ic">${ICONS[id]||"▤"}</span>${t}</div><div class="d">${d}</div></a>`
+  ).join("");
+</script>
+</body>
+</html>

@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>How it works — PDF Toolkit</title>
+<meta name="description" content="How a browser-only PDF toolkit works: pdf-lib for structure, pdf.js for rendering, WebAssembly for heavy work, and why nothing is ever uploaded.">
+<link rel="canonical" href="https://merry8989-uk.github.io/pdf-toolkit/guide.html">
+<link rel="icon" href="./logo.svg" type="image/svg+xml">
+<link rel="stylesheet" href="./style.css">
+</head>
+<body>
+<main>
+  <div class="tool-head"><h1>How it works</h1><p class="lead">Every tool on this site runs inside your browser tab. Here is what that actually means.</p></div>
+
+  <div class="panel">
+    <h3>The short version</h3>
+    <p>You pick a file. The browser reads it into memory with the File API. JavaScript — running on your own machine — edits the PDF and hands the result back as a download. There is no backend that could receive your file, so there is nothing to upload to.</p>
+  </div>
+
+  <h2>What does the work</h2>
+  <div class="grid">
+    <div class="card"><div class="t">pdf-lib</div><div class="d">Reads, edits and writes PDF structure — merging, splitting, rotating, cropping, drawing text and images, forms, metadata and encryption. Pure JavaScript.</div></div>
+    <div class="card"><div class="t">pdf.js</div><div class="d">Renders pages to a canvas so we can show thumbnails, turn pages into images, and read out the text layer. The same engine behind Firefox's PDF viewer.</div></div>
+    <div class="card"><div class="t">Web Crypto</div><div class="d">Generates the random keys, salts and initialisation vectors used when you password-protect a PDF with AES-256.</div></div>
+    <div class="card"><div class="t">A tiny ZIP writer</div><div class="d">When a tool produces several files, they are bundled into a ZIP locally — with about a hundred lines of code and no dependency.</div></div>
+  </div>
+
+  <h2>How to verify the privacy claim</h2>
+  <div class="panel">
+    <p>Open your browser's developer tools, go to the <b>Network</b> tab, and use any tool. You will see the page's own assets load, and nothing else — no request carrying your document leaves the device. The libraries are served from this site's own origin, not from a third-party CDN, so there is no external service in the path at all.</p>
+  </div>
+
+  <h2>What a browser cannot do (yet)</h2>
+  <div class="panel">
+    <p>High-fidelity conversion between Office formats (Word, Excel, PowerPoint) and PDF needs a desktop-class layout engine such as LibreOffice, which does not run in a browser tab. Those tools are deliberately not offered here rather than offered badly. Everything else — the day-to-day PDF work — runs client-side.</p>
+  </div>
+
+  <h2>Questions</h2>
+  <details class="faq"><summary>Is my file uploaded anywhere?</summary><div class="body">No. The tools are static HTML, CSS and JavaScript. Your file is read into the tab's memory, processed there, and downloaded from there. There is no upload endpoint in the code.</div></details>
+  <details class="faq"><summary>Why does a big PDF sometimes feel slow?</summary><div class="body">Because your device is doing the work. Very large files or high-resolution page rendering can be heavy on a low-powered phone. Splitting the document first usually helps.</div></details>
+  <details class="faq"><summary>Are the libraries loaded from a CDN?</summary><div class="body">No. pdf-lib and pdf.js are stored in this site's own <code>vendor/</code> folder and served from the same origin, which is what lets the Content-Security-Policy stay locked to 'self'.</div></details>
+</main>
+<script type="module">import { siteChrome } from "./app.js"; siteChrome();</script>
+</body>
+</html>
