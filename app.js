@@ -263,6 +263,16 @@ export function rotCanvas(src, deg) {
   return out;
 }
 
+/** Mirror a canvas horizontally and/or vertically. */
+export function flipCanvas(src, h, v) {
+  const out = canvasOf(src.width, src.height);
+  const g = out.getContext("2d");
+  g.translate(h ? out.width : 0, v ? out.height : 0);
+  g.scale(h ? -1 : 1, v ? -1 : 1);
+  g.drawImage(src, 0, 0);
+  return out;
+}
+
 /** Downscale a canvas so its longest edge is at most max. */
 export function fitCanvas(src, max) {
   const s = Math.min(1, max / Math.max(src.width, src.height));
@@ -272,6 +282,166 @@ export function fitCanvas(src, max) {
   g.imageSmoothingQuality = "high";
   g.drawImage(src, 0, 0, out.width, out.height);
   return out;
+}
+
+/* ---------- shared photo-editor helpers ---------- */
+
+/** Run a per-pixel function over a canvas. fn returns [r,g,b,a] or null to keep. */
+export function pixelMap(src, fn) {
+  const out = canvasOf(src.width, src.height);
+  const g = out.getContext("2d");
+  g.drawImage(src, 0, 0);
+  const d = g.getImageData(0, 0, out.width, out.height);
+  const a = d.data;
+  for (let i = 0; i < a.length; i += 4) {
+    const r = fn(a[i], a[i + 1], a[i + 2], a[i + 3], i >> 2);
+    if (r) { a[i] = r[0]; a[i + 1] = r[1]; a[i + 2] = r[2]; a[i + 3] = r[3]; }
+  }
+  g.putImageData(d, 0, 0);
+  return out;
+}
+
+export function rgbToHex(r, g, b) {
+  return "#" + [r, g, b].map((v) => Math.max(0, Math.min(255, Math.round(v))).toString(16).padStart(2, "0")).join("");
+}
+
+/** Draw source into a fresh canvas, optionally filled first. */
+export function canvasFrom(src, fill) {
+  const out = canvasOf(src.width, src.height);
+  const g = out.getContext("2d");
+  if (fill) { g.fillStyle = fill; g.fillRect(0, 0, out.width, out.height); }
+  g.drawImage(src, 0, 0);
+  return out;
+}
+
+/**
+ * Show an image with a draggable rectangular selection.
+ * Returns { get() -> {x,y,w,h} in SOURCE pixels or null, view }.
+ */
+export function regionPicker(ctx, host, source, opts = {}) {
+  const wrap = document.createElement("div");
+  wrap.style.cssText = "position:relative;display:inline-block;border:1px solid var(--line);border-radius:8px;overflow:hidden;max-width:100%";
+  const base = ctx.canvasOf(1, 1), over = ctx.canvasOf(1, 1);
+  base.style.display = "block";
+  over.style.cssText = "position:absolute;left:0;top:0;cursor:crosshair;touch-action:none";
+  wrap.append(base, over);
+  host.appendChild(wrap);
+
+  const view = ctx.fitCanvas(source, opts.max || 560);
+  base.width = over.width = view.width;
+  base.height = over.height = view.height;
+  base.getContext("2d").drawImage(view, 0, 0);
+  const scale = source.width / view.width;
+
+  let rect = null, sx = 0, sy = 0, drag = false;
+  const paint = () => {
+    const g = over.getContext("2d");
+    g.clearRect(0, 0, over.width, over.height);
+    if (!rect) return;
+    g.fillStyle = "rgba(0,0,0,.35)";
+    g.fillRect(rect.x, rect.y, rect.w, rect.h);
+    g.strokeStyle = "#f0b429";
+    g.lineWidth = 2;
+    g.strokeRect(rect.x, rect.y, rect.w, rect.h);
+  };
+  const pos = (e) => {
+    const r = over.getBoundingClientRect();
+    const cx = e.touches ? e.touches[0].clientX : e.clientX;
+    const cy = e.touches ? e.touches[0].clientY : e.clientY;
+    return { x: (cx - r.left) * over.width / r.width, y: (cy - r.top) * over.height / r.height };
+  };
+  const down = (e) => { e.preventDefault(); drag = true; const p = pos(e); sx = p.x; sy = p.y; };
+  const move = (e) => {
+    if (!drag) return;
+    e.preventDefault();
+    const p = pos(e);
+    rect = { x: Math.min(sx, p.x), y: Math.min(sy, p.y), w: Math.abs(p.x - sx), h: Math.abs(p.y - sy) };
+    paint();
+  };
+  const up = () => { if (drag) { drag = false; if (opts.onChange) opts.onChange(get()); } };
+  const get = () => rect && rect.w > 4 && rect.h > 4
+    ? { x: Math.round(rect.x * scale), y: Math.round(rect.y * scale), w: Math.round(rect.w * scale), h: Math.round(rect.h * scale) }
+    : null;
+  over.addEventListener("mousedown", down);
+  over.addEventListener("mousemove", move);
+  window.addEventListener("mouseup", up);
+  over.addEventListener("touchstart", down, { passive: false });
+  over.addEventListener("touchmove", move, { passive: false });
+  over.addEventListener("touchend", up);
+  paint();
+  return { get, view, scale };
+}
+
+/** Minimal EXIF reader for JPEG files. Returns a flat tag map (may be empty). */
+export async function readExif(file) {
+  const buf = new DataView(await file.slice(0, 256 * 1024).arrayBuffer());
+  if (buf.getUint16(0) !== 0xffd8) return {};
+  let off = 2;
+  while (off + 4 < buf.byteLength) {
+    if (buf.getUint8(off) !== 0xff) { off++; continue; }
+    const marker = buf.getUint8(off + 1);
+    const size = buf.getUint16(off + 2);
+    if (marker === 0xe1) {
+      const start = off + 4;
+      if (buf.getUint32(start) !== 0x45786966) return {};   // "Exif"
+      const tiff = start + 6;
+      const little = buf.getUint16(tiff) === 0x4949;
+      const rd16 = (p) => buf.getUint16(p, little);
+      const rd32 = (p) => buf.getUint32(p, little);
+      const ifd0 = tiff + rd32(tiff + 4);
+      const NAMES = { 0x010f: "Make", 0x0110: "Model", 0x0132: "DateTime", 0x0112: "Orientation", 0x011a: "XResolution", 0x8769: "ExifIFD", 0x8825: "GPSIFD", 0x0131: "Software", 0x829a: "ExposureTime", 0x829d: "FNumber", 0x8827: "ISO", 0x920a: "FocalLength", 0x9003: "DateTimeOriginal", 0xa002: "PixelXDimension", 0xa003: "PixelYDimension", 0x9209: "Flash", 0xa434: "LensModel" };
+      const out = {};
+      const readIFD = (at) => {
+        const n = rd16(at);
+        for (let i = 0; i < n; i++) {
+          const e = at + 2 + i * 12;
+          const tag = rd16(e);
+          const type = rd16(e + 2);
+          const count = rd32(e + 4);
+          const name = NAMES[tag];
+          if (name === "ExifIFD" || name === "GPSIFD") { readIFD(tiff + rd32(e + 8)); continue; }
+          if (!name) continue;
+          const vOff = tiff + (count * (type === 3 ? 2 : 4) > 4 ? rd32(e + 8) : e + 8);
+          let val = "";
+          if (type === 2) {
+            let s = "";
+            for (let k = 0; k < count; k++) { const c = buf.getUint8(vOff + k); if (!c) break; s += String.fromCharCode(c); }
+            val = s.trim();
+          } else if (type === 3) val = rd16(vOff);
+          else if (type === 4) val = rd32(vOff);
+          else if (type === 5) val = (rd32(vOff) / rd32(vOff + 4)).toFixed(3);
+          else if (type === 10) val = (buf.getInt32(vOff, little) / buf.getInt32(vOff + 4, little)).toFixed(3);
+          if (name === "ExposureTime" && typeof val === "number") val = `1/${Math.round(1 / val)} s`;
+          out[name] = val;
+        }
+      };
+      readIFD(ifd0);
+      return out;
+    }
+    if (marker === 0xda || marker === 0xd9) break;
+    off += 2 + size;
+  }
+  return {};
+}
+
+/* ---------- install prompt + service worker ---------- */
+if (typeof window !== "undefined") {
+  window.addEventListener("beforeinstallprompt", (e) => {
+    e.preventDefault();
+    window.__installPrompt = e;
+    const b = document.getElementById("installApp");
+    if (b) b.style.display = "";
+  });
+  window.addEventListener("appinstalled", () => {
+    window.__installPrompt = null;
+    const b = document.getElementById("installApp");
+    if (b) b.style.display = "none";
+  });
+  if ("serviceWorker" in navigator && location.protocol.startsWith("http")) {
+    window.addEventListener("load", () => {
+      navigator.serviceWorker.register("./sw.js").catch(() => {});
+    });
+  }
 }
 
 /* ---------- site chrome ---------- */
@@ -325,13 +495,48 @@ function chrome(active) {
   const footer = document.createElement("footer");
   footer.className = "site";
   footer.innerHTML = `
-    <div class="bar">
-      <span>© ${new Date().getFullYear()} PDF Toolkit — every file is processed in your browser.</span>
-      <span style="margin-left:auto;display:flex;gap:14px">
-        <a href="./privacy.html">Privacy</a><a href="./terms.html">Terms</a><a href="./tools.html">Tools</a>
-      </span>
+    <div class="bar" style="flex-direction:column;align-items:stretch;gap:18px">
+      <div class="foot-main">
+        <div class="foot-col">
+          <div class="foot-title">Get the app</div>
+          <p class="foot-note">Install it like a native app, or download the whole thing and run it yourself — it is a static site.</p>
+          <div class="row">
+            <button class="btn sm" id="installApp" type="button" style="display:none">⬇ Install app</button>
+            <a class="btn ghost sm" href="https://github.com/merry8989-uk/pdf-toolkit/archive/refs/heads/main.zip" rel="noopener">⬇ Download source (.zip)</a>
+            <a class="btn ghost sm" href="https://github.com/merry8989-uk/pdf-toolkit" target="_blank" rel="noopener">View on GitHub</a>
+          </div>
+          <p class="foot-note" id="installHint">Installing adds an icon to your home screen and lets every tool run offline.</p>
+        </div>
+        <div class="foot-col">
+          <div class="foot-title">Suggest a feature</div>
+          <p class="foot-note">Found a bug, or want a tool that isn't here? Send it over — ideas are very welcome.</p>
+          <div class="row">
+            <a class="btn ghost sm" href="https://instagram.com/osintgram_io" target="_blank" rel="noopener">📸 @osintgram_io</a>
+          </div>
+        </div>
+      </div>
+      <div class="foot-bottom">
+        <span>© ${new Date().getFullYear()} PDF Toolkit — every file is processed in your browser, never uploaded.</span>
+        <span class="foot-links">
+          <a href="./tools.html">All tools</a><a href="./guide.html">Guide</a><a href="./privacy.html">Privacy</a><a href="./terms.html">Terms</a>
+        </span>
+      </div>
     </div>`;
   document.body.appendChild(footer);
+
+  const installBtn = footer.querySelector("#installApp");
+  const showInstall = () => { if (window.__installPrompt && installBtn) installBtn.style.display = ""; };
+  showInstall();
+  if (installBtn) {
+    installBtn.addEventListener("click", async () => {
+      const p = window.__installPrompt;
+      if (!p) { toast("Use your browser menu → “Install app” or “Add to Home screen”."); return; }
+      p.prompt();
+      try { await p.userChoice; } catch (e) { /* ignore */ }
+      window.__installPrompt = null;
+      installBtn.style.display = "none";
+    });
+  }
   return { header, footer };
 }
 
@@ -452,7 +657,8 @@ export function mountTool(cfg) {
     toast,
     loadPdfLib, loadPdfJs, openDocument, parseRanges, thumbnails, fmtSize,
     fileToImage, canvasOf, canvasBlob, hexToRgb, anchorXY, ANCHORS,
-    PHOTO_FILTERS, applyFilter, adjustCanvas, sharpenCanvas, rotCanvas, fitCanvas,
+    PHOTO_FILTERS, applyFilter, adjustCanvas, sharpenCanvas, rotCanvas, fitCanvas, flipCanvas,
+    pixelMap, rgbToHex, canvasFrom, regionPicker, readExif,
     progress(p) { progress.classList.add("on"); bar.style.width = Math.max(0, Math.min(1, p)) * 100 + "%"; },
     progressDone() { bar.style.width = "100%"; setTimeout(() => { progress.classList.remove("on"); bar.style.width = "0"; }, 500); },
     setBusy(b, label) { go.disabled = b || (!cfg.noFile && !files.length); if (label) go.textContent = label; },

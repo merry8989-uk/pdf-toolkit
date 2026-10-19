@@ -9,6 +9,8 @@
 <meta property="og:type" content="website">
 <meta property="og:title" content="PDF Toolkit — free PDF &amp; image tools that never upload your files">
 <meta property="og:description" content="60+ PDF and image tools that run in your browser. Your files never leave your device.">
+<link rel="manifest" href="./manifest.webmanifest">
+<meta name="theme-color" content="#0d1320">
 <link rel="icon" href="./logo.svg" type="image/svg+xml">
 <link rel="stylesheet" href="./style.css">
 <script type="application/ld+json">
@@ -21,9 +23,9 @@
 <body>
 <main>
   <section class="hero">
-    <span class="pill">100% client-side · <span id="toolcount">60+</span> tools</span>
-    <h1>Every PDF and image tool you need — without the upload</h1>
-    <p class="lead">Merge, split, compress, organise, rotate, watermark, sign, redact, OCR, convert, protect — plus photo filters, editors and a full set of image tools. Everything runs inside your browser tab with WebAssembly, so your documents never leave your device. No accounts. No file-size servers. No waiting.</p>
+    <span class="pill">100% client-side · <span id="toolcount">100</span> tools</span>
+    <h1>Every PDF and photo tool you need — without the upload</h1>
+    <p class="lead">Merge, split, compress, organise, watermark, sign, redact, OCR and protect PDFs — then edit photos with a full editor: filters, colour grading, background removal, object removal, shapes, drawing, collage and more. Everything runs inside your browser tab with WebAssembly, so your files never leave your device. No accounts. No file-size servers. No waiting.</p>
     <div class="row" style="margin-top:20px">
       <a class="btn" href="#all">Browse all tools</a>
       <a class="btn ghost" href="./guide.html">How it works</a>
@@ -49,6 +51,8 @@
     <details class="faq"><summary>Is there a file-size limit?</summary><div class="body">There is no server limit. The practical ceiling is your device's available memory — very large PDFs may be slow on low-RAM phones. Splitting big documents first usually helps.</div></details>
     <details class="faq"><summary>Which tools are not here, and why?</summary><div class="body">High-fidelity Office⇄PDF conversion (Word/Excel/PowerPoint) and AI summarising/translation need a desktop-class engine or a model server, neither of which can run in a browser tab. They are left out rather than offered badly.</div></details>
     <details class="faq"><summary>How does OCR work without a server?</summary><div class="body">The OCR tool uses Tesseract, compiled to WebAssembly, running in a background worker in your browser. The language data is bundled with the site, so even OCR happens offline.</div></details>
+    <details class="faq"><summary>Can I install it as an app?</summary><div class="body">Yes. Use the <b>Install app</b> button in the footer (or your browser's <i>Install app</i> / <i>Add to Home screen</i> menu). A service worker caches the app and its engines, so the tools keep working offline after your first visit. You can also download the whole source from the footer and run it yourself — there is no build step.</div></details>
+    <details class="faq"><summary>Can I request a tool that isn't here?</summary><div class="body">Please do — ideas and bug reports are welcome on Instagram at <a href="https://instagram.com/osintgram_io" target="_blank" rel="noopener">@osintgram_io</a>. Tools that need AI models (true AI background removal, skin retouch, AI upscaling) currently ship as honest, model-free approximations.</div></details>
   </section>
 </main>
 

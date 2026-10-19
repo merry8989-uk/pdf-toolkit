@@ -1,0 +1,36 @@
+{
+  "name": "PDF Toolkit — PDF & photo tools",
+  "short_name": "PDF Toolkit",
+  "description": "100 browser-based PDF and photo tools. Merge, split, compress, OCR, edit photos and more — files are processed on your device and never uploaded.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#0d1320",
+  "theme_color": "#0d1320",
+  "categories": [
+    "productivity",
+    "utilities",
+    "photo"
+  ],
+  "icons": [
+    {
+      "src": "./icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}

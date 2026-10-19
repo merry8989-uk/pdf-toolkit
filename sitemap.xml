@@ -54,19 +54,55 @@
   <url><loc>https://merry8989-uk.github.io/pdf-toolkit/protect.html</loc></url>
   <url><loc>https://merry8989-uk.github.io/pdf-toolkit/unlock.html</loc></url>
   <url><loc>https://merry8989-uk.github.io/pdf-toolkit/ocr.html</loc></url>
-  <url><loc>https://merry8989-uk.github.io/pdf-toolkit/convert-image.html</loc></url>
-  <url><loc>https://merry8989-uk.github.io/pdf-toolkit/image-to-base64.html</loc></url>
-  <url><loc>https://merry8989-uk.github.io/pdf-toolkit/favicon.html</loc></url>
-  <url><loc>https://merry8989-uk.github.io/pdf-toolkit/compress-image.html</loc></url>
-  <url><loc>https://merry8989-uk.github.io/pdf-toolkit/resize-image.html</loc></url>
+  <url><loc>https://merry8989-uk.github.io/pdf-toolkit/photo-editor.html</loc></url>
   <url><loc>https://merry8989-uk.github.io/pdf-toolkit/image-filters.html</loc></url>
   <url><loc>https://merry8989-uk.github.io/pdf-toolkit/adjust-image.html</loc></url>
+  <url><loc>https://merry8989-uk.github.io/pdf-toolkit/colour-balance.html</loc></url>
+  <url><loc>https://merry8989-uk.github.io/pdf-toolkit/white-balance.html</loc></url>
   <url><loc>https://merry8989-uk.github.io/pdf-toolkit/sharpen-image.html</loc></url>
-  <url><loc>https://merry8989-uk.github.io/pdf-toolkit/crop-image.html</loc></url>
-  <url><loc>https://merry8989-uk.github.io/pdf-toolkit/rotate-image.html</loc></url>
+  <url><loc>https://merry8989-uk.github.io/pdf-toolkit/draw-on-image.html</loc></url>
+  <url><loc>https://merry8989-uk.github.io/pdf-toolkit/add-shapes.html</loc></url>
+  <url><loc>https://merry8989-uk.github.io/pdf-toolkit/background-remove.html</loc></url>
+  <url><loc>https://merry8989-uk.github.io/pdf-toolkit/background-change.html</loc></url>
+  <url><loc>https://merry8989-uk.github.io/pdf-toolkit/remove-object.html</loc></url>
+  <url><loc>https://merry8989-uk.github.io/pdf-toolkit/blur-region.html</loc></url>
+  <url><loc>https://merry8989-uk.github.io/pdf-toolkit/colour-overlay.html</loc></url>
+  <url><loc>https://merry8989-uk.github.io/pdf-toolkit/gradient-overlay.html</loc></url>
+  <url><loc>https://merry8989-uk.github.io/pdf-toolkit/duotone.html</loc></url>
+  <url><loc>https://merry8989-uk.github.io/pdf-toolkit/colour-splash.html</loc></url>
+  <url><loc>https://merry8989-uk.github.io/pdf-toolkit/posterize.html</loc></url>
+  <url><loc>https://merry8989-uk.github.io/pdf-toolkit/vignette.html</loc></url>
+  <url><loc>https://merry8989-uk.github.io/pdf-toolkit/film-grain.html</loc></url>
   <url><loc>https://merry8989-uk.github.io/pdf-toolkit/grayscale-image.html</loc></url>
+  <url><loc>https://merry8989-uk.github.io/pdf-toolkit/sketch.html</loc></url>
+  <url><loc>https://merry8989-uk.github.io/pdf-toolkit/cartoon.html</loc></url>
+  <url><loc>https://merry8989-uk.github.io/pdf-toolkit/glitch.html</loc></url>
+  <url><loc>https://merry8989-uk.github.io/pdf-toolkit/emboss-edge.html</loc></url>
+  <url><loc>https://merry8989-uk.github.io/pdf-toolkit/tilt-shift.html</loc></url>
+  <url><loc>https://merry8989-uk.github.io/pdf-toolkit/mirror-image.html</loc></url>
+  <url><loc>https://merry8989-uk.github.io/pdf-toolkit/overlay-image.html</loc></url>
+  <url><loc>https://merry8989-uk.github.io/pdf-toolkit/blend-images.html</loc></url>
+  <url><loc>https://merry8989-uk.github.io/pdf-toolkit/stitch-images.html</loc></url>
+  <url><loc>https://merry8989-uk.github.io/pdf-toolkit/grid-split.html</loc></url>
+  <url><loc>https://merry8989-uk.github.io/pdf-toolkit/collage.html</loc></url>
+  <url><loc>https://merry8989-uk.github.io/pdf-toolkit/image-compare.html</loc></url>
   <url><loc>https://merry8989-uk.github.io/pdf-toolkit/image-watermark.html</loc></url>
   <url><loc>https://merry8989-uk.github.io/pdf-toolkit/add-text-to-image.html</loc></url>
   <url><loc>https://merry8989-uk.github.io/pdf-toolkit/image-border.html</loc></url>
-  <url><loc>https://merry8989-uk.github.io/pdf-toolkit/collage.html</loc></url>
+  <url><loc>https://merry8989-uk.github.io/pdf-toolkit/crop-image.html</loc></url>
+  <url><loc>https://merry8989-uk.github.io/pdf-toolkit/rotate-image.html</loc></url>
+  <url><loc>https://merry8989-uk.github.io/pdf-toolkit/resize-image.html</loc></url>
+  <url><loc>https://merry8989-uk.github.io/pdf-toolkit/rounded-corners.html</loc></url>
+  <url><loc>https://merry8989-uk.github.io/pdf-toolkit/drop-shadow.html</loc></url>
+  <url><loc>https://merry8989-uk.github.io/pdf-toolkit/upscale-image.html</loc></url>
+  <url><loc>https://merry8989-uk.github.io/pdf-toolkit/convert-image.html</loc></url>
+  <url><loc>https://merry8989-uk.github.io/pdf-toolkit/compress-image.html</loc></url>
+  <url><loc>https://merry8989-uk.github.io/pdf-toolkit/social-resize.html</loc></url>
+  <url><loc>https://merry8989-uk.github.io/pdf-toolkit/passport-photo.html</loc></url>
+  <url><loc>https://merry8989-uk.github.io/pdf-toolkit/image-to-base64.html</loc></url>
+  <url><loc>https://merry8989-uk.github.io/pdf-toolkit/favicon.html</loc></url>
+  <url><loc>https://merry8989-uk.github.io/pdf-toolkit/color-picker.html</loc></url>
+  <url><loc>https://merry8989-uk.github.io/pdf-toolkit/palette.html</loc></url>
+  <url><loc>https://merry8989-uk.github.io/pdf-toolkit/exif-viewer.html</loc></url>
+  <url><loc>https://merry8989-uk.github.io/pdf-toolkit/strip-exif.html</loc></url>
 </urlset>
