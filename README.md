@@ -15,7 +15,7 @@ This one has no server to upload to. Your file is read into the browser tab's
 memory, edited there with WebAssembly and JavaScript, and downloaded straight
 back to your device. Open the Network tab and watch — nothing goes out.
 
-## Tools (61)
+## Tools (64)
 
 **PDF · Organise pages (18)** — Merge · Split · Split by size · Split by bookmarks ·
 Remove pages · Extract pages · Organise · Rotate · Reverse pages · Mix / interleave ·
@@ -25,8 +25,8 @@ Remove blank pages · Add page border
 **PDF · Optimise & repair (6)** — Compress · Repair · Grayscale · Invert colours ·
 Remove metadata · PDF info
 
-**PDF · Convert (6)** — Images to PDF · PDF to JPG · Text to PDF · Scan to PDF ·
-Extract text · PDF to Markdown
+**PDF · Convert (6)** — Images to PDF · PDF to JPG · Text to PDF · Scan to PDF
+(camera, with filters and a page editor) · Extract text · PDF to Markdown
 
 **PDF · Edit & annotate (16)** — Page numbers · Header & footer · Bates numbering ·
 Watermark · Image watermark · Stamps · Add text · Sign · Redact · Edit metadata ·
@@ -36,8 +36,9 @@ Fill form · Flatten form · Add bookmarks · Add attachments · Extract attachm
 
 **PDF · OCR (1)** — OCR PDF (searchable scans)
 
-**Photos (12)** — Convert image · Image to Base64 · Favicon generator ·
-Compress image · Resize image · Crop image · Rotate & flip · Grayscale image ·
+**Photos (15)** — Convert image · Image to Base64 · Favicon generator ·
+Compress image · Resize image · **Photo filters** · **Adjust image** ·
+**Sharpen or blur** · Crop image · Rotate & flip · Grayscale image ·
 Watermark image · Add text to image · Add image border · Collage
 
 The whole set is driven by `registry.js` — the nav dropdowns, the home page and

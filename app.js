@@ -171,6 +171,109 @@ export const ANCHORS = [
   ["bottom-left", "Bottom left"], ["bottom-center", "Bottom centre"], ["bottom-right", "Bottom right"],
 ];
 
+/* ---------- photo filters & editors (shared by scan, filters and adjust tools) ---------- */
+export const PHOTO_FILTERS = {
+  none:     { label: "Original",        css: "" },
+  document: { label: "Document scan",   css: "grayscale(1) contrast(1.45) brightness(1.12)" },
+  bw:       { label: "Black & white",   css: "grayscale(1) contrast(1.6) brightness(1.05)", pixel: "threshold" },
+  grayscale:{ label: "Grayscale",       css: "grayscale(1)" },
+  enhance:  { label: "Enhance",         css: "contrast(1.25) saturate(1.15) brightness(1.06)" },
+  lighten:  { label: "Lighten",         css: "brightness(1.2)" },
+  darken:   { label: "Darken",          css: "brightness(0.86)" },
+  sepia:    { label: "Sepia",           css: "sepia(0.85)" },
+  warm:     { label: "Warm",            css: "sepia(0.35) saturate(1.25) brightness(1.03)" },
+  cool:     { label: "Cool",            css: "hue-rotate(-14deg) saturate(1.15) brightness(1.02)" },
+  fade:     { label: "Fade",            css: "contrast(0.85) saturate(0.72) brightness(1.08)" },
+  vivid:    { label: "Vivid",           css: "saturate(1.55) contrast(1.12)" },
+  invert:   { label: "Invert",          css: "invert(1)" },
+};
+
+/** Apply a named preset filter to a canvas, returning a NEW canvas. */
+export function applyFilter(src, name) {
+  const f = PHOTO_FILTERS[name] || PHOTO_FILTERS.none;
+  const out = canvasOf(src.width, src.height);
+  const g = out.getContext("2d");
+  g.fillStyle = "#fff";
+  g.fillRect(0, 0, out.width, out.height);
+  if (f.css) g.filter = f.css;
+  g.drawImage(src, 0, 0);
+  g.filter = "none";
+  if (f.pixel === "threshold") {
+    const d = g.getImageData(0, 0, out.width, out.height);
+    const a = d.data;
+    for (let i = 0; i < a.length; i += 4) {
+      const lum = 0.299 * a[i] + 0.587 * a[i + 1] + 0.114 * a[i + 2];
+      const v = lum > 142 ? 255 : 0;
+      a[i] = a[i + 1] = a[i + 2] = v;
+    }
+    g.putImageData(d, 0, 0);
+  }
+  return out;
+}
+
+/** Manual adjustments. All values are 100 = unchanged except hue (deg) and blur (px). */
+export function adjustCanvas(src, a = {}) {
+  const out = canvasOf(src.width, src.height);
+  const g = out.getContext("2d");
+  g.fillStyle = "#fff";
+  g.fillRect(0, 0, out.width, out.height);
+  const parts = [];
+  if (a.brightness != null && a.brightness !== 100) parts.push(`brightness(${a.brightness / 100})`);
+  if (a.contrast != null && a.contrast !== 100) parts.push(`contrast(${a.contrast / 100})`);
+  if (a.saturation != null && a.saturation !== 100) parts.push(`saturate(${a.saturation / 100})`);
+  if (a.hue) parts.push(`hue-rotate(${a.hue}deg)`);
+  if (a.blur) parts.push(`blur(${a.blur}px)`);
+  if (a.sepia) parts.push(`sepia(${a.sepia / 100})`);
+  if (a.grayscale) parts.push(`grayscale(${a.grayscale / 100})`);
+  g.filter = parts.join(" ") || "none";
+  g.drawImage(src, 0, 0);
+  return out;
+}
+
+/** Simple box-free 3×3 unsharp mask. amount 0..1. */
+export function sharpenCanvas(src, amount = 0.6) {
+  const w = src.width, h = src.height;
+  const s = src.getContext("2d").getImageData(0, 0, w, h);
+  const a = s.data;
+  const out = new Uint8ClampedArray(a);
+  const k = amount, centre = 1 + 4 * k, side = -k;
+  for (let y = 1; y < h - 1; y++) {
+    for (let x = 1; x < w - 1; x++) {
+      const i = (y * w + x) * 4;
+      for (let c = 0; c < 3; c++) {
+        out[i + c] = centre * a[i + c] + side * (a[i - 4 + c] + a[i + 4 + c] + a[i - w * 4 + c] + a[i + w * 4 + c]);
+      }
+    }
+  }
+  const dst = canvasOf(w, h);
+  dst.getContext("2d").putImageData(new ImageData(out, w, h), 0, 0);
+  return dst;
+}
+
+/** Rotate a canvas by 0/90/180/270 degrees. */
+export function rotCanvas(src, deg) {
+  deg = ((deg % 360) + 360) % 360;
+  if (!deg) return src;
+  const swap = deg === 90 || deg === 270;
+  const out = canvasOf(swap ? src.height : src.width, swap ? src.width : src.height);
+  const g = out.getContext("2d");
+  g.translate(out.width / 2, out.height / 2);
+  g.rotate(deg * Math.PI / 180);
+  g.drawImage(src, -src.width / 2, -src.height / 2);
+  return out;
+}
+
+/** Downscale a canvas so its longest edge is at most max. */
+export function fitCanvas(src, max) {
+  const s = Math.min(1, max / Math.max(src.width, src.height));
+  if (s >= 1) return src;
+  const out = canvasOf(src.width * s, src.height * s);
+  const g = out.getContext("2d");
+  g.imageSmoothingQuality = "high";
+  g.drawImage(src, 0, 0, out.width, out.height);
+  return out;
+}
+
 /* ---------- site chrome ---------- */
 function chrome(active) {
   const theme = localStorage.getItem("theme");
@@ -349,6 +452,7 @@ export function mountTool(cfg) {
     toast,
     loadPdfLib, loadPdfJs, openDocument, parseRanges, thumbnails, fmtSize,
     fileToImage, canvasOf, canvasBlob, hexToRgb, anchorXY, ANCHORS,
+    PHOTO_FILTERS, applyFilter, adjustCanvas, sharpenCanvas, rotCanvas, fitCanvas,
     progress(p) { progress.classList.add("on"); bar.style.width = Math.max(0, Math.min(1, p)) * 100 + "%"; },
     progressDone() { bar.style.width = "100%"; setTimeout(() => { progress.classList.remove("on"); bar.style.width = "0"; }, 500); },
     setBusy(b, label) { go.disabled = b || (!cfg.noFile && !files.length); if (label) go.textContent = label; },

@@ -54,7 +54,7 @@ export const REGISTRY = [
           ["images-to-pdf", "Images to PDF", "JPG / PNG / WebP into one PDF"],
           ["pdf-to-jpg", "PDF to JPG", "Render pages to images"],
           ["text-to-pdf", "Text to PDF", "Turn pasted text into a clean PDF"],
-          ["scan-to-pdf", "Scan to PDF", "Use your camera to make a PDF"],
+          ["scan-to-pdf", "Scan to PDF", "Camera scan with filters and a page editor"],
           ["extract-text", "Extract text", "Read the selectable text out of a PDF"],
           ["pdf-to-markdown", "PDF to Markdown", "Convert to headings, lists and tables"],
         ],
@@ -122,9 +122,12 @@ export const REGISTRY = [
         ],
       },
       {
-        name: "Edit",
+        name: "Edit & filters",
         icon: "✎",
         tools: [
+          ["image-filters", "Photo filters", "Preset looks with before/after preview"],
+          ["adjust-image", "Adjust image", "Brightness, contrast, saturation, hue, blur"],
+          ["sharpen-image", "Sharpen or blur", "Make a photo crisper or softer"],
           ["crop-image", "Crop image", "Trim edges by percentage"],
           ["rotate-image", "Rotate & flip", "Rotate and mirror an image"],
           ["grayscale-image", "Grayscale image", "Turn a photo black and white"],
