@@ -53,10 +53,17 @@ export const REGISTRY = [
         tools: [
           ["images-to-pdf", "Images to PDF", "JPG / PNG / WebP into one PDF"],
           ["pdf-to-jpg", "PDF to JPG", "Render pages to images"],
-          ["text-to-pdf", "Text to PDF", "Turn pasted text into a clean PDF"],
           ["scan-to-pdf", "Scan to PDF", "Camera scan with filters and a page editor"],
           ["extract-text", "Extract text", "Read the selectable text out of a PDF"],
           ["pdf-to-markdown", "PDF to Markdown", "Convert to headings, lists and tables"],
+        ],
+      },
+      {
+        name: "Create & write",
+        icon: "✍",
+        tools: [
+          ["create-pdf", "Create PDF", "Start from a blank page and write with formatting"],
+          ["text-to-pdf", "Text to PDF", "Turn pasted text into a clean PDF"],
         ],
       },
       {

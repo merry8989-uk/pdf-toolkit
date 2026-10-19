@@ -24,9 +24,9 @@ the app shell and every engine you use, so the tools keep working offline after
 the first visit. You can also **Download source (.zip)** from the footer to run
 the whole thing yourself — there is no build step.
 
-## Tools (100)
+## Tools (101)
 
-### PDF — 49
+### PDF — 50
 
 **Organise pages (18)** — Merge · Split · Split by size · Split by bookmarks ·
 Remove pages · Extract pages · Organise · Rotate · Reverse pages · Mix / interleave ·
@@ -36,8 +36,11 @@ Remove blank pages · Add page border
 **Optimise & repair (6)** — Compress · Repair · Grayscale · Invert colours ·
 Remove metadata · PDF info
 
-**Convert (6)** — Images to PDF · PDF to JPG · Text to PDF · Scan to PDF (camera,
-filters, page editor) · Extract text · PDF to Markdown
+**Convert (5)** — Images to PDF · PDF to JPG · Scan to PDF (camera, filters, page
+editor) · Extract text · PDF to Markdown
+
+**Create & write (2)** — Create PDF (blank page + a word processor: headings,
+bold/italic/underline, colours, fonts, alignment, lists, page breaks) · Text to PDF
 
 **Edit & annotate (16)** — Page numbers · Header & footer · Bates numbering ·
 Watermark · Image watermark · Stamps · Add text · Sign · Redact · Edit metadata ·

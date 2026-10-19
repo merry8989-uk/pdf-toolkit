@@ -13,7 +13,13 @@ mountTool({
   ],
   async run(ctx) {
     ctx.toast("Loading the OCR engine… this can take a moment the first time.");
-    const { createWorker } = await import("../vendor/tesseract/tesseract.esm.min.js");
+    const mod = await import("../vendor/tesseract/tesseract.esm.min.js");
+    let Tesseract = mod.default || mod;
+    if (Tesseract && Tesseract.default && !Tesseract.createWorker) Tesseract = Tesseract.default;
+    const createWorker = Tesseract.createWorker || mod.createWorker;
+    if (typeof createWorker !== "function") {
+      throw new Error("The OCR engine could not be loaded. Reload the page and try again.");
+    }
     const worker = await createWorker("eng", 1, {
       workerPath: new URL("../vendor/tesseract/worker.min.js", import.meta.url).href,
       corePath: new URL("../vendor/tesseract-core/", import.meta.url).href,
