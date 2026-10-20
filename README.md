@@ -139,6 +139,32 @@ freezing the tab. As a guide:
 Small formats genuinely reach 5000 DPI; full pages top out lower, because
 5000 DPI on A4 would be a 41339 × 58465 pixel image.
 
+## Reducing file size
+
+Both compression tools can now work towards an **exact target size** — the thing
+you actually need when a portal or an email says "under 500 KB".
+
+- **Compress PDF → Hit a target file size.** Enter a size in KB or MB. The tool
+  renders the pages, then binary-searches for the *highest* JPEG quality that
+  fits your budget, dropping the DPI step by step (from your chosen maximum down
+  to 40) only when it has to. It re-checks the finished file and tightens the
+  budget if the container overhead pushed it over, then reports the exact size
+  and the DPI it settled on.
+- **Compress image → Hit a target file size.** Searches quality first, then
+  shrinks the pixel dimensions, until the file fits. For PNG (which is lossless)
+  only the pixel size can be reduced.
+
+If a target genuinely cannot be reached, the tool says so and gives you the
+smallest file it could produce rather than silently missing the mark.
+
+The three methods for a PDF, at a glance:
+
+| Method | Keeps text selectable | Typical saving | Best for |
+| --- | --- | --- | --- |
+| Lossless rebuild | Yes | 5–20% | Archiving, when text must stay searchable |
+| Re-render at a DPI | No | 50–95% | When you know the resolution you want |
+| Hit a target size | No | Whatever is needed | Upload limits and email |
+
 ## Honest limits
 
 - **Office ⇄ PDF** (Word/Excel/PowerPoint) needs a desktop-class layout engine and is not offered.

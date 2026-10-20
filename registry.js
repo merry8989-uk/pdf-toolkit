@@ -39,7 +39,7 @@ export const REGISTRY = [
         name: "Optimise & repair",
         icon: "⚙",
         tools: [
-          ["compress", "Compress PDF", "Lossless, or re-render at 40–5000 DPI"],
+          ["compress", "Compress PDF", "Hit a target size, or re-render at 40–5000 DPI"],
           ["repair", "Repair PDF", "Best-effort rebuild of a damaged file"],
           ["grayscale", "Grayscale PDF", "Convert pages to black and white"],
           ["invert-colors", "Invert colours", "Invert the colours of every page"],
@@ -187,7 +187,7 @@ export const REGISTRY = [
         icon: "⇄",
         tools: [
           ["convert-image", "Convert image", "JPG ⇄ PNG ⇄ WebP"],
-          ["compress-image", "Compress image", "Shrink photos, or size by print size and DPI"],
+          ["compress-image", "Compress image", "Hit a target size, or size by print size and DPI"],
           ["social-resize", "Social media resize", "Exact sizes for every platform"],
           ["passport-photo", "Passport / ID photo", "Standard passport and visa sizes"],
           ["image-to-base64", "Image to Base64", "Get a data URI or .txt"],
