@@ -63,8 +63,10 @@ mountTool({
       if (el) el.addEventListener("input", update);
     });
     ctx.extra.querySelector("#rst").addEventListener("click", () => {
-      ({ exposure: 0, temperature: 0, tint: 0, gamma: 1 });
-      [["exposure", 0], ["temperature", 0], ["tint", 0], ["gamma", 1]].forEach(([n, d]) => { const el = document.getElementById("opt-" + n); if (el) el.value = d; });
+      [["exposure", 0], ["temperature", 0], ["tint", 0], ["gamma", 1]].forEach(([n, d]) => {
+        const el = document.getElementById("opt-" + n);
+        if (el) el.value = d;
+      });
       update();
     });
     update();

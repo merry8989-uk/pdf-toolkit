@@ -151,6 +151,11 @@ mountTool({
     const base = Number(o.base) || 11;
     const leading = Number(o.leading) || 1.45;
     const maxW = PW - margin * 2;
+    // The editor reports sizes in CSS pixels. Convert them to points so the
+    // "base font size" option actually controls the document's text size
+    // while headings keep their relative proportions.
+    const editorBasePx = parseFloat(getComputedStyle(editor).fontSize) || 15;
+    const scale = base / editorBasePx;
 
     const fontCache = new Map();
     const getFont = async (family, bold, italic) => {
@@ -168,14 +173,16 @@ mountTool({
     for (let i = 0; i < blanks; i++) newPage();
 
     const drawLine = async (runs, opts) => {
-      const size = opts.size || base;
-      const lh = size * leading;
+      const blockPx = opts.sizePx || editorBasePx;
+      const blockSize = blockPx * scale;
+      const lh = blockSize * leading;
+      const avail = maxW - (opts.indent || 0);
       const lines = [];
       let line = [], lineW = 0;
-      const avail = maxW - (opts.indent || 0);
+
       for (const run of runs) {
         const f = await getFont(run.font, run.bold, run.italic);
-        const sz = run.size || size;
+        const sz = (run.size || blockPx) * scale;
         for (const tok of run.text.split(/(\s+)/)) {
           if (!tok) continue;
           if (tok === "\n") { lines.push({ line, w: lineW }); line = []; lineW = 0; continue; }
@@ -185,28 +192,36 @@ mountTool({
             line = []; lineW = 0;
             if (/^\s+$/.test(tok)) continue;
           }
-          line.push({ text: tok, font: f, size: sz, color: run.color, underline: run.underline, w });
+          line.push({ text: tok, font: f, size: sz, color: run.color, underline: run.underline, space: /^\s+$/.test(tok), w });
           lineW += w;
         }
       }
       if (line.length) lines.push({ line, w: lineW });
 
-      for (const ln of lines) {
+      const align = opts.align || "left";
+      lines.forEach((ln, li) => {
         if (y - lh < margin) newPage();
         y -= lh;
-        const align = opts.align || "left";
         let x = margin + (opts.indent || 0);
+        let pad = 0;
         if (align === "center") x += (avail - ln.w) / 2;
         else if (align === "right") x += (avail - ln.w);
+        else if (align === "justify") {
+          // justify every line except the last of the block
+          const gaps = ln.line.filter((s) => s.space).length;
+          if (li < lines.length - 1 && gaps > 0) pad = Math.max(0, (avail - ln.w) / gaps);
+        }
         for (const seg of ln.line) {
           const col = seg.color || opts.color || [0.1, 0.11, 0.13];
-          page.drawText(seg.text, { x, y: y + lh * 0.24, size: seg.size, font: seg.font, color: rgb(col[0], col[1], col[2]) });
-          if (seg.underline) {
-            page.drawLine({ start: { x, y: y + lh * 0.16 }, end: { x: x + seg.w, y: y + lh * 0.16 }, thickness: Math.max(0.5, seg.size / 22), color: rgb(col[0], col[1], col[2]) });
+          if (!seg.space) {
+            page.drawText(seg.text, { x, y: y + lh * 0.24, size: seg.size, font: seg.font, color: rgb(col[0], col[1], col[2]) });
+            if (seg.underline) {
+              page.drawLine({ start: { x, y: y + lh * 0.16 }, end: { x: x + seg.w, y: y + lh * 0.16 }, thickness: Math.max(0.5, seg.size / 22), color: rgb(col[0], col[1], col[2]) });
+            }
           }
-          x += seg.w;
+          x += seg.w + pad;
         }
-      }
+      });
       return lh;
     };
 
@@ -224,12 +239,17 @@ mountTool({
         y -= base * 0.6;
         continue;
       }
-      let size = base, indent = 0, align = b.align === "start" ? "left" : (b.align || "left");
-      if (b.type === "h1") { size = base * 1.9; y -= base * 0.5; }
-      else if (b.type === "h2") { size = base * 1.5; y -= base * 0.4; }
-      else if (b.type === "h3") { size = base * 1.25; y -= base * 0.3; }
-      else if (b.type === "quote") { indent = base * 1.6; }
-      else if (b.type === "bullet" || b.type === "number") { indent = base * 1.6; }
+      // The block's own font size comes from what the browser computed, so a
+      // heading stays a heading whatever the base size is set to.
+      const sizePx = Math.max(...b.runs.map((r) => r.size || editorBasePx), editorBasePx);
+      const size = sizePx * scale;
+      let indent = 0;
+      const align = b.align === "start" ? "left" : (b.align || "left");
+      if (b.type === "h1") y -= base * 0.5;
+      else if (b.type === "h2") y -= base * 0.4;
+      else if (b.type === "h3") y -= base * 0.3;
+      else if (b.type === "quote") indent = base * 1.6;
+      else if (b.type === "bullet" || b.type === "number") indent = base * 1.6;
 
       if (b.type === "bullet" || b.type === "number") {
         if (y - size * leading < margin) newPage();
@@ -237,7 +257,7 @@ mountTool({
         const f = await getFont(null, false, false);
         page.drawText(b.marker, { x: margin, y: y + size * leading * 0.24, size, font: f, color: rgb(0.35, 0.37, 0.42) });
       }
-      await drawLine(b.runs, { size, indent, align, color: b.color });
+      await drawLine(b.runs, { sizePx, indent, align, color: b.color });
       y -= size * 0.35;   // paragraph gap
     }
 

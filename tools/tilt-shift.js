@@ -42,10 +42,17 @@ mountTool({
     const feather = Math.max(8, half * 0.6);
     const mask = ctx.canvasOf(w, h);
     const mg = mask.getContext("2d");
-    const grad = mg.createLinearGradient(0, Math.max(0, top - feather), 0, Math.min(h, bottom + feather));
+    // The gradient spans the feathered zone; the fully-sharp band sits between
+    // the two inner stops, so the transition is symmetric above and below.
+    const y0 = Math.max(0, top - feather);
+    const y1 = Math.min(h, bottom + feather);
+    const span = Math.max(1, y1 - y0);
+    const s1 = Math.min(1, Math.max(0, (top - y0) / span));
+    const s2 = Math.min(1, Math.max(s1, (bottom - y0) / span));
+    const grad = mg.createLinearGradient(0, y0, 0, y1);
     grad.addColorStop(0, "rgba(0,0,0,0)");
-    grad.addColorStop(Math.min(0.49, (top - (top - feather)) / ((bottom + feather) - (top - feather))), "rgba(0,0,0,1)");
-    grad.addColorStop(Math.min(0.51, (bottom - (top - feather)) / ((bottom + feather) - (top - feather))), "rgba(0,0,0,1)");
+    grad.addColorStop(s1, "rgba(0,0,0,1)");
+    grad.addColorStop(s2, "rgba(0,0,0,1)");
     grad.addColorStop(1, "rgba(0,0,0,0)");
     mg.fillStyle = grad;
     mg.fillRect(0, 0, w, h);

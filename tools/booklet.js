@@ -24,7 +24,6 @@ mountTool({
     const [pw, ph] = dims[ctx.options.size] || dims.a4;
     const m = 10;
     const cellW = (pw - 2 * m) / 2, cellH = ph - 2 * m;
-    const blank = null;
 
     const order = [];
     for (let k = 0; k < n / 4; k++) {
@@ -36,7 +35,7 @@ mountTool({
       ctx.progress(si / order.length);
       const sheet = out.addPage([pw, ph]);
       pair.forEach((num, col) => {
-        const ep = num >= 1 && num <= idxs.length ? emb[num - 1] : blank;
+        const ep = num >= 1 && num <= idxs.length ? emb[num - 1] : null;
         if (!ep) return;
         const s = Math.min(cellW / ep.width, cellH / ep.height);
         const w = ep.width * s, h = ep.height * s;

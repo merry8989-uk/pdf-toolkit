@@ -10,8 +10,6 @@ const extOf = (f) => f === "jpeg" ? "jpg" : f;
 
 let original = null, ops = [], strokes = [], drawMode = false, strokeColor = "#ff3b30", strokeWidth = 6;
 
-function mirror(c, h, v) { return c; } // replaced at runtime via ctx.flipCanvas
-
 function render(ctx) {
   let c = ctx.canvasFrom(original);
   for (const op of ops) {

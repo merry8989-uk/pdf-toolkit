@@ -2,9 +2,9 @@
    PDF Toolkit — shared engine + UI kit
    Everything runs in the browser. No uploads, no server, no CDN.
    ============================================================ */
-import { createZip } from "./zip.js";
+import { createZip, crc32 } from "./zip.js";
 import { REGISTRY, ALL_TOOLS } from "./registry.js";
-export { createZip, REGISTRY, ALL_TOOLS };
+export { createZip, crc32, REGISTRY, ALL_TOOLS };
 
 /* ---------- lazy library loaders (imported only when needed) ---------- */
 let _pdfLib = null;
@@ -284,6 +284,106 @@ export function fitCanvas(src, max) {
   return out;
 }
 
+/* ---------- resolution (DPI) helpers ---------- */
+export const DPI_MIN = 40;
+export const DPI_MAX = 5000;
+// A browser canvas can only be so large before the tab runs out of memory.
+export const CANVAS_MAX_SIDE = 16384;
+export const CANVAS_MAX_PIXELS = 80_000_000;
+
+export const clampDpi = (v) => Math.max(DPI_MIN, Math.min(DPI_MAX, Math.round(Number(v) || 150)));
+
+/** Pixel dimensions for a page of wPt×hPt points rendered at `dpi`. */
+export function rasterSize(wPt, hPt, dpi) {
+  return { w: Math.round((wPt / 72) * dpi), h: Math.round((hPt / 72) * dpi) };
+}
+
+/** Returns an error string when the requested raster is too large, else null. */
+export function checkRaster(w, h) {
+  if (w > CANVAS_MAX_SIDE || h > CANVAS_MAX_SIDE || w * h > CANVAS_MAX_PIXELS) {
+    return `That would need a ${w}×${h} image, which is more than a browser tab can hold in memory.`;
+  }
+  return null;
+}
+
+/** The highest DPI that will actually work for a page of this size. */
+export function maxDpiFor(wPt, hPt) {
+  const wIn = Math.max(0.1, wPt / 72), hIn = Math.max(0.1, hPt / 72);
+  const bySide = Math.floor(CANVAS_MAX_SIDE / Math.max(wIn, hIn));
+  const byPixels = Math.floor(Math.sqrt(CANVAS_MAX_PIXELS / (wIn * hIn)));
+  return Math.max(DPI_MIN, Math.min(DPI_MAX, Math.min(bySide, byPixels)));
+}
+
+/** Print size in millimetres → pixels at a given DPI. */
+export function mmToPx(mm, dpi) {
+  return Math.max(1, Math.round((Number(mm) || 0) / 25.4 * dpi));
+}
+
+/** Write a DPI density into a JPEG's JFIF header (so print apps read it). */
+export function setJpegDpi(bytes, dpi) {
+  const d = new Uint8Array(bytes);
+  if (d[0] !== 0xff || d[1] !== 0xd8) return d;
+  let off = 2;
+  while (off + 4 < d.length) {
+    if (d[off] !== 0xff) { off++; continue; }
+    const marker = d[off + 1];
+    if (marker === 0xe0 && d[off + 4] === 0x4a && d[off + 5] === 0x46 && d[off + 6] === 0x49 && d[off + 7] === 0x46 && d[off + 8] === 0x00) {
+      d[off + 11] = 1;                                  // units: 1 = dots per inch
+      d[off + 12] = (dpi >> 8) & 0xff; d[off + 13] = dpi & 0xff;
+      d[off + 14] = (dpi >> 8) & 0xff; d[off + 15] = dpi & 0xff;
+      return d;
+    }
+    if (marker === 0xda || marker === 0xd9) break;
+    off += 2 + ((d[off + 2] << 8) | d[off + 3]);
+  }
+  return d;
+}
+
+/** Write a DPI density into a PNG (adds or replaces the pHYs chunk). */
+export function setPngDpi(bytes, dpi) {
+  const src = new Uint8Array(bytes);
+  const sig = [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a];
+  for (let i = 0; i < 8; i++) if (src[i] !== sig[i]) return src;
+  const ppm = Math.round(dpi / 0.0254);
+  let off = 8;
+  while (off + 8 <= src.length) {
+    const len = ((src[off] << 24) | (src[off + 1] << 16) | (src[off + 2] << 8) | src[off + 3]) >>> 0;
+    const type = String.fromCharCode(src[off + 4], src[off + 5], src[off + 6], src[off + 7]);
+    if (type === "pHYs") {
+      const out = new Uint8Array(src);
+      const dv = new DataView(out.buffer, out.byteOffset);
+      dv.setUint32(off + 8, ppm);
+      dv.setUint32(off + 12, ppm);
+      out[off + 16] = 1;
+      dv.setUint32(off + 17, crc32(out.subarray(off + 4, off + 17)));
+      return out;
+    }
+    if (type === "IDAT" || type === "IEND") break;
+    off += 12 + len;
+  }
+  const chunk = new Uint8Array(21);
+  const dv = new DataView(chunk.buffer);
+  dv.setUint32(0, 9);
+  chunk.set([0x70, 0x48, 0x59, 0x73], 4);              // "pHYs"
+  dv.setUint32(8, ppm);
+  dv.setUint32(12, ppm);
+  chunk[16] = 1;                                        // unit = metre
+  dv.setUint32(17, crc32(chunk.subarray(4, 17)));
+  const ihdrEnd = 8 + 4 + 4 + 13 + 4;
+  const out = new Uint8Array(src.length + 21);
+  out.set(src.subarray(0, ihdrEnd), 0);
+  out.set(chunk, ihdrEnd);
+  out.set(src.subarray(ihdrEnd), ihdrEnd + 21);
+  return out;
+}
+
+/** Tag a canvas blob with a DPI value, if the format supports it. */
+export function withDpi(u8, mime, dpi) {
+  if (mime === "image/jpeg") return setJpegDpi(u8, dpi);
+  if (mime === "image/png") return setPngDpi(u8, dpi);
+  return u8;
+}
+
 /* ---------- shared photo-editor helpers ---------- */
 
 /** Run a per-pixel function over a canvas. fn returns [r,g,b,a] or null to keep. */
@@ -409,9 +509,13 @@ export async function readExif(file) {
             val = s.trim();
           } else if (type === 3) val = rd16(vOff);
           else if (type === 4) val = rd32(vOff);
-          else if (type === 5) val = (rd32(vOff) / rd32(vOff + 4)).toFixed(3);
-          else if (type === 10) val = (buf.getInt32(vOff, little) / buf.getInt32(vOff + 4, little)).toFixed(3);
-          if (name === "ExposureTime" && typeof val === "number") val = `1/${Math.round(1 / val)} s`;
+          else if (type === 5) { const d = rd32(vOff + 4); val = d ? rd32(vOff) / d : 0; }
+          else if (type === 10) { const d = buf.getInt32(vOff + 4, little); val = d ? buf.getInt32(vOff, little) / d : 0; }
+          // present rationals nicely
+          if (typeof val === "number") {
+            if (name === "ExposureTime") val = val >= 1 ? `${val.toFixed(1)} s` : `1/${Math.round(1 / val)} s`;
+            else if (name === "FNumber" || name === "FocalLength" || name === "XResolution") val = val.toFixed(1);
+          }
           out[name] = val;
         }
       };
@@ -659,6 +763,7 @@ export function mountTool(cfg) {
     fileToImage, canvasOf, canvasBlob, hexToRgb, anchorXY, ANCHORS,
     PHOTO_FILTERS, applyFilter, adjustCanvas, sharpenCanvas, rotCanvas, fitCanvas, flipCanvas,
     pixelMap, rgbToHex, canvasFrom, regionPicker, readExif,
+    DPI_MIN, DPI_MAX, clampDpi, rasterSize, checkRaster, maxDpiFor, mmToPx, withDpi, setJpegDpi, setPngDpi,
     progress(p) { progress.classList.add("on"); bar.style.width = Math.max(0, Math.min(1, p)) * 100 + "%"; },
     progressDone() { bar.style.width = "100%"; setTimeout(() => { progress.classList.remove("on"); bar.style.width = "0"; }, 500); },
     setBusy(b, label) { go.disabled = b || (!cfg.noFile && !files.length); if (label) go.textContent = label; },

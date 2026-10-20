@@ -24,7 +24,7 @@ the app shell and every engine you use, so the tools keep working offline after
 the first visit. You can also **Download source (.zip)** from the footer to run
 the whole thing yourself — there is no build step.
 
-## Tools (101)
+## Tools (102)
 
 ### PDF — 50
 
@@ -50,7 +50,7 @@ Fill form · Flatten form · Add bookmarks · Add attachments · Extract attachm
 
 **OCR (1)** — OCR PDF (searchable scans)
 
-### Photos — 51
+### Photos — 52
 
 **Photo editor (8)** — Photo editor (all-in-one) · Photo filters · Adjust image ·
 Colour balance · Auto white balance · Sharpen or blur · Draw on image · Add shapes
@@ -68,9 +68,9 @@ Grid split · Collage · Compare images · Watermark image · Add text to image 
 **Transform (6)** — Crop image · Rotate & flip · Resize image · Rounded corners ·
 Drop shadow · Upscale image
 
-**Files & output (10)** — Convert image · Compress image · Social media resize ·
-Passport / ID photo · Image to Base64 · Favicon generator · Colour picker ·
-Colour palette · EXIF viewer · Strip metadata
+**Files & output (11)** — Convert image · Compress image · Social media resize ·
+Passport / ID photo · Image to Base64 · Favicon generator · **Image DPI** ·
+Colour picker · Colour palette · EXIF viewer · Strip metadata
 
 The whole set is driven by `registry.js` — the nav dropdowns, the home page and
 the tools directory all build from that one file.
@@ -109,6 +109,35 @@ npx serve .
 # or
 python3 -m http.server 8000
 ```
+
+## Resolution & DPI
+
+Every resolution control accepts **40 DPI to 5000 DPI**.
+
+- **Compress PDF** — lossless rebuild, or re-render each page as a JPEG at any
+  DPI from 40 to 5000.
+- **PDF to JPG** — render pages to images at 40–5000 DPI, with the DPI written
+  into each file.
+- **Compress image** — shrink by quality, or work backwards from a print width
+  in millimetres at a chosen DPI.
+- **Image DPI** — read the DPI already stored in a photo, then tag it with a new
+  value (JPEG JFIF and PNG pHYs are written properly, with a valid CRC), or
+  resample the pixels so the image really has that resolution at a given size.
+
+**The practical ceiling depends on page size.** A browser canvas can only be so
+large, so each tool shows the highest DPI that will actually work for your
+document and refuses to start a job that would exhaust memory rather than
+freezing the tab. As a guide:
+
+| Format | Largest usable DPI |
+| --- | --- |
+| A4 page | ~909 DPI |
+| A5 page | ~1288 DPI |
+| 35 × 45 mm ID photo | 5000 DPI |
+| Typical 6 × 4 in photo | ~1700 DPI |
+
+Small formats genuinely reach 5000 DPI; full pages top out lower, because
+5000 DPI on A4 would be a 41339 × 58465 pixel image.
 
 ## Honest limits
 

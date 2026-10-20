@@ -1,7 +1,7 @@
 /* PDF Toolkit service worker — makes the app installable and usable offline.
    The shell is precached; every other same-origin file is cached as it is used,
    so the PDF/photo engines keep working after the first visit. */
-const CACHE = "pdf-toolkit-v2";
+const CACHE = "pdf-toolkit-v3";
 const SHELL = [
   "./",
   "./index.html",
@@ -33,6 +33,14 @@ self.addEventListener("activate", (event) => {
   );
 });
 
+function put(req, res) {
+  if (res && res.status === 200 && res.type === "basic") {
+    const copy = res.clone();
+    caches.open(CACHE).then((c) => c.put(req, copy)).catch(() => {});
+  }
+  return res;
+}
+
 self.addEventListener("fetch", (event) => {
   const req = event.request;
   if (req.method !== "GET") return;
@@ -40,16 +48,20 @@ self.addEventListener("fetch", (event) => {
   try { url = new URL(req.url); } catch (e) { return; }
   if (url.origin !== self.location.origin) return;
 
+  // Page navigations and code: network-first, so a new deploy is picked up
+  // immediately and the cache is only a fallback when offline.
+  const isDoc = req.mode === "navigate" || /\.(html|js|css|webmanifest)$/.test(url.pathname);
+  if (isDoc) {
+    event.respondWith(
+      fetch(req).then((res) => put(req, res)).catch(() =>
+        caches.match(req).then((hit) => hit || caches.match("./index.html"))
+      )
+    );
+    return;
+  }
+
+  // Engines, fonts and language data: cache-first (they never change).
   event.respondWith(
-    caches.match(req).then((hit) => {
-      if (hit) return hit;
-      return fetch(req).then((res) => {
-        if (res && res.status === 200 && res.type === "basic") {
-          const copy = res.clone();
-          caches.open(CACHE).then((c) => c.put(req, copy)).catch(() => {});
-        }
-        return res;
-      }).catch(() => caches.match("./index.html"));
-    })
+    caches.match(req).then((hit) => hit || fetch(req).then((res) => put(req, res)))
   );
 });

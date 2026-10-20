@@ -39,7 +39,7 @@ export const REGISTRY = [
         name: "Optimise & repair",
         icon: "⚙",
         tools: [
-          ["compress", "Compress PDF", "Shrink file size with quality presets"],
+          ["compress", "Compress PDF", "Lossless, or re-render at 40–5000 DPI"],
           ["repair", "Repair PDF", "Best-effort rebuild of a damaged file"],
           ["grayscale", "Grayscale PDF", "Convert pages to black and white"],
           ["invert-colors", "Invert colours", "Invert the colours of every page"],
@@ -52,7 +52,7 @@ export const REGISTRY = [
         icon: "⇄",
         tools: [
           ["images-to-pdf", "Images to PDF", "JPG / PNG / WebP into one PDF"],
-          ["pdf-to-jpg", "PDF to JPG", "Render pages to images"],
+          ["pdf-to-jpg", "PDF to JPG", "Render pages to images at 40–5000 DPI"],
           ["scan-to-pdf", "Scan to PDF", "Camera scan with filters and a page editor"],
           ["extract-text", "Extract text", "Read the selectable text out of a PDF"],
           ["pdf-to-markdown", "PDF to Markdown", "Convert to headings, lists and tables"],
@@ -187,11 +187,12 @@ export const REGISTRY = [
         icon: "⇄",
         tools: [
           ["convert-image", "Convert image", "JPG ⇄ PNG ⇄ WebP"],
-          ["compress-image", "Compress image", "Shrink photos with quality control"],
+          ["compress-image", "Compress image", "Shrink photos, or size by print size and DPI"],
           ["social-resize", "Social media resize", "Exact sizes for every platform"],
           ["passport-photo", "Passport / ID photo", "Standard passport and visa sizes"],
           ["image-to-base64", "Image to Base64", "Get a data URI or .txt"],
           ["favicon", "Favicon generator", "Make every icon size you need"],
+          ["image-dpi", "Image DPI", "Set print resolution from 40 to 5000 DPI"],
           ["color-picker", "Colour picker", "Read exact colours from a photo"],
           ["palette", "Colour palette", "Extract the dominant colours"],
           ["exif-viewer", "EXIF viewer", "See the metadata hidden in a photo"],
