@@ -665,9 +665,12 @@ export function mountTool(cfg) {
       </div>
       <input type="file" id="file" class="sr" ${cfg.multiple ? "multiple" : ""} accept="${cfg.accept || ".pdf,application/pdf"}">
       <ul class="filelist" id="filelist"></ul>
-      <div id="extra"></div>
     </div>
     <div class="panel" id="p-opts"><div class="opts" id="opts"></div></div>
+    <!-- #extra must sit OUTSIDE #p-drop: tools with noFile:true hide the file
+         panel, and they render their whole workspace (editor, camera, preview)
+         in here. -->
+    <div id="extra"></div>
     <div class="panel">
       <div class="row">
         <button class="btn" id="go" disabled>${cfg.action || "Process"}</button>

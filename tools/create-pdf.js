@@ -140,6 +140,7 @@ mountTool({
   async run(ctx) {
     const o = ctx.options;
     const editor = ctx.extra.querySelector("#page");
+    if (!editor) throw new Error("The editor did not load. Reload the page and try again.");
     const blocks = collectBlocks(editor);
 
     const { PDFDocument, StandardFonts, rgb } = await ctx.loadPdfLib();
