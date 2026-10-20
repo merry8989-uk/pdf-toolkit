@@ -39,7 +39,7 @@ mountTool({
     });
     const bytes = await doc.save();
     ctx.download(bytes, "annotated.pdf");
-    ctx.out.innerHTML = `<p class="hint">✓ Added text to ${all ? total : sel.length} page(s).</p>`;
+    ctx.out.innerHTML = `<p class="hint">✓ Added text to ${all ? total : sel.length} page(s).${ctx.glyphWarning(o.text)}</p>`;
   },
   help: "<p>Positions are given as a percentage of the page, so the same setting lands in the same relative spot on any page size. 0% is the left/top edge.</p>",
 });

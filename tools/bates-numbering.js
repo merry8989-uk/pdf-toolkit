@@ -41,7 +41,7 @@ mountTool({
 
     const bytes = await doc.save();
     ctx.download(bytes, "bates.pdf");
-    ctx.out.innerHTML = `<p class="hint">✓ Stamped ${doc.getPageCount()} page(s), starting at <b>${(o.prefix || "") + String(start).padStart(digits, "0")}</b>.</p>`;
+    ctx.out.innerHTML = `<p class="hint">✓ Stamped ${doc.getPageCount()} page(s), starting at <b>${(o.prefix || "") + String(start).padStart(digits, "0")}</b>.${ctx.glyphWarning((o.prefix || "") + (o.suffix || ""))}</p>`;
   },
   help: "<p>Bates numbering is used in legal discovery to give every page a unique, sequential identifier. The number is zero-padded so the stamps line up in order.</p>",
 });

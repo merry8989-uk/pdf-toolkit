@@ -179,6 +179,8 @@ mountTool({
     const mv = (e) => { if (!drawMode || !drawing) return; e.preventDefault(); cur.push(norm(e)); drawStrokes(); };
     const upH = () => { drawing = false; cur = null; };
     overC.addEventListener("mousedown", dn); overC.addEventListener("mousemove", mv);
+    if (ctx._peUp) window.removeEventListener("mouseup", ctx._peUp);
+    ctx._peUp = upH;
     window.addEventListener("mouseup", upH);
     overC.addEventListener("touchstart", dn, { passive: false }); overC.addEventListener("touchmove", mv, { passive: false });
     overC.addEventListener("touchend", upH);

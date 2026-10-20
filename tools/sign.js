@@ -76,6 +76,8 @@ mountTool({
     const stop = () => { drawing = false; };
     pad.addEventListener("mousedown", start);
     pad.addEventListener("mousemove", move);
+    if (ctx._signUp) window.removeEventListener("mouseup", ctx._signUp);
+    ctx._signUp = stop;
     window.addEventListener("mouseup", stop);
     pad.addEventListener("touchstart", start, { passive: false });
     pad.addEventListener("touchmove", move, { passive: false });

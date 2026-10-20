@@ -41,7 +41,7 @@ mountTool({
 
     const bytes = await doc.save();
     ctx.download(bytes, "headered.pdf");
-    ctx.out.innerHTML = `<p class="hint">✓ Added a header/footer to ${o.skip ? total - 1 : total} page(s).</p>`;
+    ctx.out.innerHTML = `<p class="hint">✓ Added a header/footer to ${o.skip ? total - 1 : total} page(s).${ctx.glyphWarning((o.header || "") + (o.footer || ""))}</p>`;
   },
   help: "<p>Header text sits near the top edge and footer text near the bottom, both centred. Leave either field blank to skip it.</p>",
 });

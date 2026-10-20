@@ -33,7 +33,7 @@ mountTool({
     });
     const bytes = await doc.save();
     ctx.download(bytes, "watermarked.pdf");
-    ctx.out.innerHTML = `<p class="hint">✓ Watermarked ${doc.getPageCount()} page(s).</p>`;
+    ctx.out.innerHTML = `<p class="hint">✓ Watermarked ${doc.getPageCount()} page(s).${ctx.glyphWarning(text)}</p>`;
   },
   help: "<p>The same stamp is drawn centred on every page. Lower the opacity for a subtle, non-intrusive mark.</p>",
 });

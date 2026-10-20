@@ -48,7 +48,8 @@ Fill form · Flatten form · Add bookmarks · Add attachments · Extract attachm
 
 **Security (2)** — Protect (AES-256) · Unlock
 
-**OCR (1)** — OCR PDF (searchable scans)
+**OCR (1)** — OCR — PDFs & images (read text from a scanned PDF, a photo or a
+screenshot; optionally builds a searchable PDF with an invisible text layer)
 
 ### Photos — 52
 
@@ -164,6 +165,22 @@ The three methods for a PDF, at a glance:
 | Lossless rebuild | Yes | 5–20% | Archiving, when text must stay searchable |
 | Re-render at a DPI | No | 50–95% | When you know the resolution you want |
 | Hit a target size | No | Whatever is needed | Upload limits and email |
+
+## Font coverage
+
+The PDF text tools (watermark, header & footer, stamps, add text, Bates
+numbering, Create PDF, Text to PDF) draw with the built-in PDF fonts, which use
+WinAnsiEncoding: Latin-1 plus common typographic characters such as the em dash,
+curly quotes, ellipsis, bullet and degree sign.
+
+Characters outside that set — the **rupee sign ₹**, Devanagari and other Indic
+scripts, CJK, emoji — have no glyph in those fonts. They are not silently
+dropped any more: the tool tells you which characters could not be drawn. To
+render them properly you would need to embed a Unicode font, which is a
+substantial addition; it is on the roadmap rather than pretended.
+
+Bookmark titles are a different case: they are written as UTF-16 strings, so
+they **do** carry ₹, Devanagari and emoji correctly.
 
 ## Honest limits
 

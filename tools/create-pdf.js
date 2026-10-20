@@ -275,7 +275,7 @@ mountTool({
     const bytes = await doc.save();
     ctx.download(bytes, "document.pdf");
     const blankOnly = !blocks.length;
-    ctx.out.innerHTML = `<p class="hint">✓ Created <b>document.pdf</b> — ${doc.getPageCount()} page(s)${blankOnly ? " (blank)" : ", with selectable text"}${o.numbers ? ", numbered" : ""}.</p>`;
+    ctx.out.innerHTML = `<p class="hint">✓ Created <b>document.pdf</b> — ${doc.getPageCount()} page(s)${blankOnly ? " (blank)" : ", with selectable text"}${o.numbers ? ", numbered" : ""}.${ctx.glyphWarning(editor.textContent)}</p>`;
   },
   help: "<p>The editor is a real rich-text surface. On export the document is walked block by block, formatted text runs are measured with the actual PDF fonts, and the text is laid out with word wrapping, alignment, lists and page breaks. The output is a normal PDF with <b>selectable, searchable text</b> — not an image.</p>",
 });

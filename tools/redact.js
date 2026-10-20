@@ -93,6 +93,8 @@ mountTool({
     };
     boxCanvas.addEventListener("mousedown", down);
     boxCanvas.addEventListener("mousemove", move);
+    if (ctx._redactUp) window.removeEventListener("mouseup", ctx._redactUp);
+    ctx._redactUp = up;
     window.addEventListener("mouseup", up);
     boxCanvas.addEventListener("touchstart", down, { passive: false });
     boxCanvas.addEventListener("touchmove", move, { passive: false });

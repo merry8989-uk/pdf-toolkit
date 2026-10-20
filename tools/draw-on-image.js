@@ -82,6 +82,8 @@ mountTool({
     const mv = (e) => { if (!drawing) return; e.preventDefault(); cur.pts.push(norm(e)); paint(); };
     const up = () => { drawing = false; cur = null; };
     over.addEventListener("mousedown", dn); over.addEventListener("mousemove", mv);
+    if (ctx._drawUp) window.removeEventListener("mouseup", ctx._drawUp);
+    ctx._drawUp = up;
     window.addEventListener("mouseup", up);
     over.addEventListener("touchstart", dn, { passive: false }); over.addEventListener("touchmove", mv, { passive: false });
     over.addEventListener("touchend", up);

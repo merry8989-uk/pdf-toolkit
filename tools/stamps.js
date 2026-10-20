@@ -43,7 +43,7 @@ mountTool({
 
     const bytes = await doc.save();
     ctx.download(bytes, "stamped.pdf");
-    ctx.out.innerHTML = `<p class="hint">✓ Applied the “${text.trim()}” stamp to ${doc.getPageCount()} page(s).</p>`;
+    ctx.out.innerHTML = `<p class="hint">✓ Applied the “${text.trim()}” stamp to ${doc.getPageCount()} page(s).${ctx.glyphWarning(text)}</p>`;
   },
   help: "<p>Each page gets a bordered stamp centred on it. Lower the opacity so the underlying text stays readable.</p>",
 });

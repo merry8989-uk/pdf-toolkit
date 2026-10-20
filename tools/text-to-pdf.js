@@ -58,7 +58,7 @@ mountTool({
     }
     const bytes = await doc.save();
     ctx.download(bytes, "text.pdf");
-    ctx.out.innerHTML = `<p class="hint">✓ Created <b>text.pdf</b> — ${doc.getPageCount()} page(s) from ${lines.length} line(s).</p>`;
+    ctx.out.innerHTML = `<p class="hint">✓ Created <b>text.pdf</b> — ${doc.getPageCount()} page(s) from ${lines.length} line(s).${ctx.glyphWarning(text)}</p>`;
   },
   help: "<p>Text is wrapped to the page width and paginated automatically. Blank lines are preserved as paragraph breaks.</p>",
 });

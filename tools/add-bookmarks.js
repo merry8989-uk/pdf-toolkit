@@ -19,7 +19,7 @@ mountTool({
     }).filter(Boolean);
     if (!parsed.length) throw new Error('Add at least one line like "Introduction, 1".');
 
-    const { PDFDocument, PDFName, PDFString, PDFNumber } = await ctx.loadPdfLib();
+    const { PDFDocument, PDFName, PDFHexString, PDFNumber } = await ctx.loadPdfLib();
     const doc = await PDFDocument.load(await ctx.files[0].arrayBuffer(), { ignoreEncryption: true });
     const total = doc.getPageCount();
     const entries = parsed.filter((e) => e.page >= 1 && e.page <= total).sort((a, b) => a.page - b.page);
@@ -31,7 +31,10 @@ mountTool({
     entries.forEach((e, i) => {
       const page = doc.getPage(e.page - 1);
       const dict = {
-        Title: PDFString.of(e.title),
+        // PDFHexString.fromText writes UTF-16BE with a BOM, so accents, dashes,
+        // curly quotes, ₹ and non-Latin scripts survive. PDFString.of() truncates
+        // anything outside Latin-1 and throws on some scripts.
+        Title: PDFHexString.fromText(e.title),
         Parent: outlineRef,
         Dest: context.obj([page.ref, PDFName.of("Fit")]),
       };

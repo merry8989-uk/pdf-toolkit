@@ -384,6 +384,32 @@ export function withDpi(u8, mime, dpi) {
   return u8;
 }
 
+/* ---------- font coverage ---------- */
+// The built-in PDF fonts use WinAnsiEncoding: Latin-1 plus a handful of
+// typographic extras. Anything else (₹, Devanagari, emoji, CJK) has no glyph.
+const WINANSI_EXTRA = new Set([
+  0x20ac, 0x201a, 0x0192, 0x201e, 0x2026, 0x2020, 0x2021, 0x02c6, 0x2030,
+  0x0160, 0x2039, 0x0152, 0x017d, 0x2018, 0x2019, 0x201c, 0x201d, 0x2022,
+  0x2013, 0x2014, 0x02dc, 0x2122, 0x0161, 0x203a, 0x0153, 0x017e, 0x0178,
+]);
+
+export function unsupportedChars(text) {
+  const bad = new Set();
+  for (const ch of String(text == null ? "" : text)) {
+    const n = ch.codePointAt(0);
+    if (n > 0xff && !WINANSI_EXTRA.has(n)) bad.add(ch);
+  }
+  return [...bad];
+}
+
+/** A sentence to append to a tool's result when text will not render. */
+export function glyphWarning(text) {
+  const bad = unsupportedChars(text);
+  if (!bad.length) return "";
+  const shown = bad.length <= 4 ? bad.join(" ") : bad.slice(0, 3).join(" ") + " …";
+  return ` <b>Note:</b> ${bad.length} character${bad.length > 1 ? "s" : ""} (${shown}) ${bad.length > 1 ? "are" : "is"} not in the built-in PDF fonts and may appear blank or substituted.`;
+}
+
 /* ---------- shared photo-editor helpers ---------- */
 
 /** Run a per-pixel function over a canvas. fn returns [r,g,b,a] or null to keep. */
@@ -464,6 +490,10 @@ export function regionPicker(ctx, host, source, opts = {}) {
     : null;
   over.addEventListener("mousedown", down);
   over.addEventListener("mousemove", move);
+  // Each picker replaces the previous one. Drop the old window listener so
+  // repeatedly loading files doesn't stack handlers pointing at dead canvases.
+  if (ctx._regionUp) window.removeEventListener("mouseup", ctx._regionUp);
+  ctx._regionUp = up;
   window.addEventListener("mouseup", up);
   over.addEventListener("touchstart", down, { passive: false });
   over.addEventListener("touchmove", move, { passive: false });
@@ -766,6 +796,7 @@ export function mountTool(cfg) {
     fileToImage, canvasOf, canvasBlob, hexToRgb, anchorXY, ANCHORS,
     PHOTO_FILTERS, applyFilter, adjustCanvas, sharpenCanvas, rotCanvas, fitCanvas, flipCanvas,
     pixelMap, rgbToHex, canvasFrom, regionPicker, readExif,
+    unsupportedChars, glyphWarning,
     DPI_MIN, DPI_MAX, clampDpi, rasterSize, checkRaster, maxDpiFor, mmToPx, withDpi, setJpegDpi, setPngDpi,
     progress(p) { progress.classList.add("on"); bar.style.width = Math.max(0, Math.min(1, p)) * 100 + "%"; },
     progressDone() { bar.style.width = "100%"; setTimeout(() => { progress.classList.remove("on"); bar.style.width = "0"; }, 500); },

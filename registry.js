@@ -18,7 +18,7 @@ export const REGISTRY = [
           ["merge", "Merge PDF", "Combine several PDFs into one, in any order"],
           ["split", "Split PDF", "Extract ranges or split into separate files"],
           ["split-by-size", "Split by size", "Cut a PDF into chunks under a size limit"],
-          ["split-by-bookmarks", "Split by bookmarks", "One file per bookmark section"],
+          ["split-by-bookmarks", "Split by bookmarks", "One file per bookmark (named destinations too)"],
           ["remove-pages", "Remove pages", "Delete pages and keep the rest"],
           ["extract-pages", "Extract pages", "Save only the pages you select"],
           ["organize", "Organise PDF", "Reorder pages into a new sequence"],
@@ -100,7 +100,7 @@ export const REGISTRY = [
         name: "OCR",
         icon: "👁",
         tools: [
-          ["ocr", "OCR PDF", "Make a scanned PDF searchable"],
+          ["ocr", "OCR — PDFs & images", "Read text from a scanned PDF, photo or screenshot"],
         ],
       },
     ],
