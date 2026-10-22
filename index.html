@@ -73,6 +73,7 @@
 
 <script type="module">
   import { siteChrome, ALL_TOOLS } from "./app.js";
+  import * as log from "./logger.js";
   siteChrome();
   document.getElementById("toolcount").textContent = ALL_TOOLS.length;
 
@@ -121,6 +122,19 @@
     if (e.key === "Escape" && document.activeElement === input) { input.value = ""; render(); input.blur(); }
   });
   render();
+
+  // Note in the diagnostics log when a search finds nothing, which is the
+  // signal that a tool is missing. Kept local, like everything else.
+  let searchTimer;
+  input.addEventListener("input", () => {
+    clearTimeout(searchTimer);
+    searchTimer = setTimeout(() => {
+      const q = input.value.trim();
+      if (!q) return;
+      const hits = document.querySelectorAll("#all .card").length;
+      log.activity("Searched tools", { q: q.slice(0, 60), results: hits });
+    }, 900);
+  });
 
   // Recently used tools — remembered by app.js on every tool page.
   try {

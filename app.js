@@ -4,7 +4,12 @@
    ============================================================ */
 import { createZip, crc32 } from "./zip.js";
 import { REGISTRY, ALL_TOOLS } from "./registry.js";
+import * as log from "./logger.js";
 export { createZip, crc32, REGISTRY, ALL_TOOLS };
+
+// Start collecting diagnostics straight away. Silent by design: nothing is
+// shown to the user, and nothing leaves the browser. See settings.html.
+log.installGlobalHandlers();
 
 /* ---------- lazy library loaders (imported only when needed) ---------- */
 let _pdfLib = null;
@@ -64,6 +69,8 @@ export function parseRanges(str, max) {
 
 export function download(data, name, mime = "application/pdf") {
   const blob = data instanceof Blob ? data : new Blob([data], { type: mime });
+  // record the outcome, not the contents
+  log.perf("Output written", { mime, size: blob.size });
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
@@ -777,6 +784,7 @@ function chrome(active) {
         ${ddHtml}
         <a href="./guide.html">Guide</a>
         <button class="theme-btn" title="Toggle theme" aria-label="Toggle theme">◐</button>
+        <a class="theme-btn" href="./settings.html" title="Settings" aria-label="Settings">⚙</a>
       </nav>
     </div>`;
   header.querySelectorAll(".dd-btn").forEach((btn) => {
@@ -825,7 +833,7 @@ function chrome(active) {
       <div class="foot-bottom">
         <span>© ${new Date().getFullYear()} PDF Toolkit — every file is processed in your browser, never uploaded.</span>
         <span class="foot-links">
-          <a href="./tools.html">All tools</a><a href="./guide.html">Guide</a><a href="./privacy.html">Privacy</a><a href="./terms.html">Terms</a>
+          <a href="./tools.html">All tools</a><a href="./guide.html">Guide</a><a href="./privacy.html">Privacy</a><a href="./terms.html">Terms</a><a href="./settings.html">Settings</a>
         </span>
       </div>
     </div>`;
@@ -982,6 +990,8 @@ export function mountTool(cfg) {
     localStorage.setItem(key, JSON.stringify(list.slice(0, 8)));
   } catch (e) { /* private mode */ }
 
+  log.activity("Tool opened", { tool: cfg.id });
+
   let cancelRequested = false;
 
   const ctx = {
@@ -1064,6 +1074,11 @@ export function mountTool(cfg) {
       const expect = wantsPdf && wantsImg ? "a PDF or an image" : wantsPdf ? "a PDF" : "an image";
       const names = rejected.map((f) => f.name).join(", ");
       toast(`${names} — that is not ${expect}, so it was skipped.`, true);
+      log.warn("app", "Skipped a file of the wrong type", { tool: cfg.id, count: rejected.length });
+    }
+    for (const f of picked) {
+      const d = log.describeFile(f);
+      log.info("app", "File added", { tool: cfg.id, type: d.type, size: d.size, ext: d.ext, name: d.name });
     }
     if (!cfg.multiple) files = picked.slice(0, 1);
     else files = files.concat(picked);
@@ -1080,6 +1095,7 @@ export function mountTool(cfg) {
   reset.addEventListener("click", () => {
     files = []; ctx.files = files; renderFiles(); out.innerHTML = ""; extra.innerHTML = "";
     if (cfg.onReset) cfg.onReset(ctx);
+    log.activity("Reset", { tool: cfg.id });
   });
 
   cancelBtn.addEventListener("click", () => {
@@ -1096,15 +1112,21 @@ export function mountTool(cfg) {
     progress.classList.add("on");
     bar.style.width = "2%";
     ctx.setBusy(true, "Working…");
+    const t0 = (performance && performance.now) ? performance.now() : Date.now();
+    const ms = () => Math.round(((performance && performance.now) ? performance.now() : Date.now()) - t0);
+    log.info("app", "Run started", { tool: cfg.id, files: files.length });
     try {
       await cfg.run(ctx);
       ctx.progressDone();
+      log.perf("Run finished", { tool: cfg.id, ms: ms(), files: files.length });
     } catch (e) {
       if (String(e && e.message) === CANCEL) {
         toast("Cancelled — nothing was saved.");
+        log.warn("app", "Run cancelled by the user", { tool: cfg.id, ms: ms() });
       } else {
         console.error(e);
         toast(e?.message ? e.message : "Something went wrong", true);
+        log.error(`${cfg.id} failed: ${(e && e.message) || e}`, e);
       }
       ctx.progressDone();
     } finally {

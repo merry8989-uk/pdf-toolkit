@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Settings — PDF Toolkit</title>
+<meta name="description" content="Appearance, stored data and the diagnostics log. Everything stays in your browser.">
+<link rel="canonical" href="https://merry8989-uk.github.io/pdf-toolkit/settings.html">
+<meta name="robots" content="noindex">
+<link rel="apple-touch-icon" href="./icon-192.png">
+<link rel="manifest" href="./manifest.webmanifest">
+<meta name="theme-color" content="#0d1320">
+<link rel="icon" href="./logo.svg" type="image/svg+xml">
+<link rel="stylesheet" href="./style.css">
+</head>
+<body>
+<main id="app">
+  <div class="tool-head">
+    <a class="back" href="./index.html">← Home</a>
+    <h1>Settings</h1>
+    <p class="lead">Appearance, the data this site keeps in your browser, and the diagnostics log.</p>
+  </div>
+
+  <section class="panel">
+    <h3>Appearance</h3>
+    <div class="opts">
+      <div class="field">
+        <label for="theme">Theme</label>
+        <select id="theme">
+          <option value="system">Match my system</option>
+          <option value="light">Light</option>
+          <option value="dark">Dark</option>
+        </select>
+      </div>
+    </div>
+    <p class="hint">Your choice is stored in this browser only.</p>
+  </section>
+
+  <section class="panel">
+    <h3>Diagnostics &amp; logs</h3>
+    <p class="hint">
+      This log records what happens inside the app — tool runs, timings, and any errors — so a
+      problem can be diagnosed without guesswork. It is written to this browser's own storage and
+      <b>never leaves your device</b>: there is no server here to send it to. It is not shown
+      anywhere else in the app, and nothing about it interrupts you. File <i>contents</i> are never
+      recorded; file names are recorded only if you switch that on below.
+    </p>
+
+    <div id="logstats" class="logstats"></div>
+
+    <div class="logbar">
+      <label>Level <select id="f-level"><option value="">All</option></select></label>
+      <label>Category <select id="f-cat"><option value="">All</option></select></label>
+      <label class="grow">Search <input id="f-q" type="search" placeholder="filter by text…" autocomplete="off"></label>
+      <button class="btn ghost sm" id="refresh" type="button">Refresh</button>
+    </div>
+
+    <div id="logtable" class="logtable"></div>
+
+    <div class="row" style="margin-top:14px">
+      <button class="btn sm" id="copy" type="button">Copy all</button>
+      <button class="btn ghost sm" id="dl-json" type="button">Download .json</button>
+      <button class="btn ghost sm" id="dl-txt" type="button">Download .txt</button>
+      <button class="btn ghost sm" id="clear" type="button">Clear log</button>
+    </div>
+
+    <h4 style="margin:22px 0 8px">What gets recorded</h4>
+    <div class="opts" id="logopts"></div>
+  </section>
+
+  <section class="panel">
+    <h3>Data stored in this browser</h3>
+    <p class="hint">The app keeps a few small things locally so it feels familiar next time. None of it is sent anywhere.</p>
+    <div class="row">
+      <button class="btn ghost sm" id="clr-recent" type="button">Clear recently-used tools</button>
+      <button class="btn ghost sm" id="clr-opts" type="button">Clear remembered tool settings</button>
+      <button class="btn ghost sm" id="clr-all" type="button">Clear everything</button>
+    </div>
+    <p class="hint" id="stored-info"></p>
+  </section>
+
+  <p class="privacy-note"><span>🔒</span><span><b>Nothing is uploaded.</b> This page and the log it shows live entirely in your browser. Open the Network tab to verify that no data is sent.</span></p>
+</main>
+<script type="module" src="./settings.js"></script>
+</body>
+</html>

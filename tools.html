@@ -33,6 +33,7 @@
 </main>
 <script type="module">
   import { siteChrome, ALL_TOOLS } from "./app.js";
+  import * as log from "./logger.js";
   siteChrome();
   document.getElementById("toolcount").textContent = ALL_TOOLS.length;
 
@@ -78,6 +79,15 @@
   }
 
   input.addEventListener("input", render);
+  let searchTimer;
+  input.addEventListener("input", () => {
+    clearTimeout(searchTimer);
+    searchTimer = setTimeout(() => {
+      const q = input.value.trim();
+      if (!q) return;
+      log.activity("Searched tools", { q: q.slice(0, 60), results: document.querySelectorAll("#all .card").length });
+    }, 900);
+  });
   document.addEventListener("keydown", (e) => {
     if (e.key === "/" && document.activeElement !== input) { e.preventDefault(); input.focus(); }
     if (e.key === "Escape" && document.activeElement === input) { input.value = ""; render(); input.blur(); }

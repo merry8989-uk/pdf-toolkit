@@ -238,6 +238,26 @@ h3.grp{font-size:12px;font-family:var(--mono);letter-spacing:1.4px;text-transfor
 }
 @media (max-width:560px){ .dd-menu{grid-template-columns:1fr;} }
 
+/* ---------- diagnostics / log viewer ---------- */
+.logstats{margin:14px 0 12px;font-size:14px;}
+.badge{display:inline-block;font:11px/1.6 var(--mono);padding:1px 7px;border-radius:6px;border:1px solid var(--line);}
+.l-trace{color:#8b8f98} .l-debug{color:#7aa2f7} .l-info{color:#4c9f70}
+.l-warn{color:#c98a13} .l-error{color:#d9534f} .l-fatal{color:#fff;background:#b3261e;border-color:#b3261e}
+.logbar{display:flex;flex-wrap:wrap;gap:10px 14px;align-items:flex-end;margin:6px 0 12px;}
+.logbar label{display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--text-dim);}
+.logbar .grow{flex:1;min-width:180px;}
+.logbar select,.logbar input{background:var(--surface-2);color:var(--text);border:1px solid var(--line);border-radius:8px;padding:8px 10px;font:inherit;font-size:13px;outline:none;}
+.logbar select:focus,.logbar input:focus{border-color:var(--brand);}
+.logtable{border:1px solid var(--line);border-radius:10px;overflow:auto;max-height:430px;background:var(--surface-2);}
+.logrow{display:grid;grid-template-columns:112px 52px 96px 1fr;gap:10px;padding:7px 12px;border-bottom:1px solid var(--line);font:12.5px/1.5 var(--mono);align-items:baseline;}
+.logrow:last-child{border-bottom:0;}
+.logrow .lt{color:var(--text-dim);white-space:nowrap;}
+.logrow .ll{font-weight:600;}
+.logrow .lc{color:var(--text-dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.logrow .lm{word-break:break-word;}
+.logrow .lmeta{display:block;color:var(--text-dim);font-size:11.5px;opacity:.85;}
+@media (max-width:620px){ .logrow{grid-template-columns:1fr 60px;grid-template-areas:"t l" "m m";} .logrow .lt{grid-area:t} .logrow .ll{grid-area:l;text-align:right} .logrow .lc{display:none} .logrow .lm{grid-area:m} }
+
 /* ---------- tool search ---------- */
 .search-wrap{position:relative;margin:26px 0 6px;}
 .search-wrap input{width:100%;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:15px 52px 15px 46px;color:var(--text);font:inherit;font-size:15px;outline:none;}

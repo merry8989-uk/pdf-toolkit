@@ -166,6 +166,43 @@ The three methods for a PDF, at a glance:
 | Re-render at a DPI | No | 50–95% | When you know the resolution you want |
 | Hit a target size | No | Whatever is needed | Upload limits and email |
 
+## Diagnostics log (Settings)
+
+The app keeps a local record of what it does so a problem can be diagnosed
+without guesswork. It is deliberately quiet: nothing is ever shown to you while
+you work, and it lives behind the gear icon in the header — `/settings.html` —
+rather than anywhere prominent.
+
+What it records:
+
+| Category | What goes in it |
+| --- | --- |
+| Application | tool opened, file added (type and size), run started/finished, reset |
+| Error | uncaught errors, unhandled promise rejections, failed asset loads, tool failures with a short stack |
+| Performance | how long each run took, output size and MIME type |
+| User activity | tool opens, resets, and searches that return few or no results |
+| Audit | settings changes |
+| Debug / trace | verbose detail, off unless you turn it on |
+
+Severities follow the usual six levels: TRACE, DEBUG, INFO, WARN, ERROR, FATAL.
+
+Privacy, since it matters for this app in particular:
+
+- The log is written to this browser's `localStorage` and **never transmitted**.
+There is no server to send it to.
+- File **contents** are never recorded. File **names** are recorded only if you
+switch that option on; by default only the type, size and extension are kept.
+- Anything whose key looks like a password, secret, token or API key is dropped
+before it is written. Passwords entered into Protect PDF or Unlock PDF never
+reach the log.
+- Identical repeated messages collapse into one entry with a repeat count, so an
+error in a loop cannot flood the buffer.
+- A ring buffer with a configurable cap (50–5000 entries) means it cannot grow
+without bound.
+
+The Settings page lets you read, filter by level/category/text, copy, export as
+`.json` or `.txt`, and clear the log, plus switch recording off entirely.
+
 ## Convenience & safety
 
 - **Search.** The home page and the tools directory have a search box covering all
