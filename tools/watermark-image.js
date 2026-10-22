@@ -37,7 +37,7 @@ mountTool({
 
     const o = ctx.options;
     const { PDFDocument } = await ctx.loadPdfLib();
-    const doc = await PDFDocument.load(await pdfFile.arrayBuffer(), { ignoreEncryption: true });
+    const doc = await ctx.loadPdf(pdfFile);
     const ib = new Uint8Array(await imgFile.arrayBuffer());
     let png;
     if (ib[0] === 0x89 && ib[1] === 0x50) png = await doc.embedPng(ib);

@@ -16,7 +16,7 @@ mountTool({
   async onFiles(ctx) {
     try {
       const { PDFDocument } = await ctx.loadPdfLib();
-      const doc = await PDFDocument.load(await ctx.files[0].arrayBuffer(), { ignoreEncryption: true });
+      const doc = await ctx.loadPdf(ctx.files[0]);
       const set = (id, v) => { const el = document.getElementById(id); if (el && v) el.value = v; };
       set("opt-title", doc.getTitle());
       set("opt-author", doc.getAuthor());
@@ -27,7 +27,7 @@ mountTool({
   async run(ctx) {
     const { PDFDocument } = await ctx.loadPdfLib();
     const o = ctx.options;
-    const doc = await PDFDocument.load(await ctx.files[0].arrayBuffer(), { ignoreEncryption: true });
+    const doc = await ctx.loadPdf(ctx.files[0]);
     doc.setTitle(o.title || "");
     doc.setAuthor(o.author || "");
     doc.setSubject(o.subject || "");

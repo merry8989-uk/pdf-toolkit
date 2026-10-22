@@ -16,7 +16,7 @@ mountTool({
     const { PDFDocument, rgb } = await ctx.loadPdfLib();
     const o = ctx.options;
     const colors = { black: rgb(0, 0, 0), gray: rgb(0.5, 0.5, 0.5), red: rgb(0.8, 0.1, 0.1), blue: rgb(0.1, 0.3, 0.8) };
-    const doc = await PDFDocument.load(await ctx.files[0].arrayBuffer(), { ignoreEncryption: true });
+    const doc = await ctx.loadPdf(ctx.files[0]);
     const m = Math.max(0, Number(o.margin) || 0);
     const w = Number(o.width) || 2;
     doc.getPages().forEach((p) => {

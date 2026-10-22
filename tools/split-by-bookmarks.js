@@ -103,7 +103,7 @@ mountTool({
   ],
   async run(ctx) {
     const { PDFDocument, PDFName } = await ctx.loadPdfLib();
-    const src = await PDFDocument.load(await ctx.files[0].arrayBuffer(), { ignoreEncryption: true });
+    const src = await ctx.loadPdf(ctx.files[0]);
     const total = src.getPageCount();
     let marks = await readOutline(src, PDFName);
     if (!ctx.options.nested) marks = marks.filter((m) => !m.depth);

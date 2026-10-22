@@ -10,7 +10,7 @@ mountTool({
   options: [{ name: "limit", label: "Max size per file (MB)", type: "number", value: 1, min: 0.05, max: 500, step: 0.05 }],
   async run(ctx) {
     const { PDFDocument } = await ctx.loadPdfLib();
-    const src = await PDFDocument.load(await ctx.files[0].arrayBuffer(), { ignoreEncryption: true });
+    const src = await ctx.loadPdf(ctx.files[0]);
     const total = src.getPageCount();
     const limit = (Number(ctx.options.limit) || 1) * 1024 * 1024;
 

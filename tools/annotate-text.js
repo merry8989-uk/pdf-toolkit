@@ -21,7 +21,7 @@ mountTool({
     const o = ctx.options;
     if (!o.text || !o.text.trim()) throw new Error("Type the text to add.");
     const colors = { black: rgb(0, 0, 0), red: rgb(0.8, 0.1, 0.1), blue: rgb(0.1, 0.3, 0.8), gray: rgb(0.4, 0.4, 0.44) };
-    const doc = await PDFDocument.load(await ctx.files[0].arrayBuffer(), { ignoreEncryption: true });
+    const doc = await ctx.loadPdf(ctx.files[0]);
     const font = await doc.embedFont(o.bold ? StandardFonts.HelveticaBold : StandardFonts.Helvetica);
     const total = doc.getPageCount();
     const sel = ctx.parseRanges(o.pages, total);

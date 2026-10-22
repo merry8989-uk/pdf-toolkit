@@ -104,7 +104,7 @@ mountTool({
     /* ---------- lossless ---------- */
     if (o.mode === "lossless") {
       const { PDFDocument } = await ctx.loadPdfLib();
-      const doc = await PDFDocument.load(input, { ignoreEncryption: true });
+      const doc = await ctx.loadPdf(input);
       const bytes = await doc.save({ useObjectStreams: true });
       ctx.download(bytes, "compressed.pdf");
       const pct = Math.round(((before - bytes.length) / before) * 100);

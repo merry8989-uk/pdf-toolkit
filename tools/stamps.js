@@ -25,7 +25,7 @@ mountTool({
     if (!text.trim()) throw new Error("Choose a stamp or type custom text.");
     const colors = { red: rgb(0.78, 0.1, 0.12), green: rgb(0.1, 0.55, 0.25), blue: rgb(0.12, 0.3, 0.75), gray: rgb(0.35, 0.35, 0.38) };
     const color = colors[o.color] || colors.red;
-    const doc = await PDFDocument.load(await ctx.files[0].arrayBuffer(), { ignoreEncryption: true });
+    const doc = await ctx.loadPdf(ctx.files[0]);
     const font = await doc.embedFont(StandardFonts.HelveticaBold);
     const size = Number(o.size) || 30;
     const op = Number(o.opacity) || 0.75;

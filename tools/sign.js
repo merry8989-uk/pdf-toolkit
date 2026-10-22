@@ -92,7 +92,7 @@ mountTool({
     if (!cropped) throw new Error("The signature box looks empty — draw something first.");
     const blob = await ctx.canvasBlob(cropped, "image/png");
     const { PDFDocument } = await ctx.loadPdfLib();
-    const doc = await PDFDocument.load(await ctx.files[0].arrayBuffer(), { ignoreEncryption: true });
+    const doc = await ctx.loadPdf(ctx.files[0]);
     const png = await doc.embedPng(new Uint8Array(await blob.arrayBuffer()));
     const o = ctx.options;
     const total = doc.getPageCount();

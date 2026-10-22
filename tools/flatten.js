@@ -9,7 +9,7 @@ mountTool({
   action: "Flatten form",
   async run(ctx) {
     const { PDFDocument } = await ctx.loadPdfLib();
-    const doc = await PDFDocument.load(await ctx.files[0].arrayBuffer(), { ignoreEncryption: true });
+    const doc = await ctx.loadPdf(ctx.files[0]);
     const form = doc.getForm();
     const n = form.getFields().length;
     if (!n) {

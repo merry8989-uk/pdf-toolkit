@@ -13,7 +13,7 @@ mountTool({
     const out = await PDFDocument.create();
     for (let i = 0; i < ctx.files.length; i++) {
       ctx.progress(i / ctx.files.length);
-      const src = await PDFDocument.load(await ctx.files[i].arrayBuffer(), { ignoreEncryption: true });
+      const src = await ctx.loadPdf(ctx.files[i]);
       const pages = await out.copyPages(src, src.getPageIndices());
       pages.forEach((p) => out.addPage(p));
     }

@@ -112,7 +112,7 @@ mountTool({
     const total = Object.values(boxes).reduce((n, b) => n + b.length, 0);
     if (!total) throw new Error("Draw at least one box to redact.");
     const { PDFDocument, rgb } = await ctx.loadPdfLib();
-    const out = await PDFDocument.load(await ctx.files[0].arrayBuffer(), { ignoreEncryption: true });
+    const out = await ctx.loadPdf(ctx.files[0]);
     const col = ctx.options.fill === "white" ? rgb(1, 1, 1) : rgb(0, 0, 0);
     const pages = out.getPages();
     for (const key of Object.keys(boxes)) {

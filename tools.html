@@ -6,10 +6,15 @@
 <title>All PDF &amp; image tools — PDF Toolkit</title>
 <meta name="description" content="The complete list of browser-based tools: merge, split, compress, organise, rotate, crop, watermark, page numbers, sign, redact, OCR, convert, protect and photo tools.">
 <link rel="canonical" href="https://merry8989-uk.github.io/pdf-toolkit/tools.html">
+<link rel="apple-touch-icon" href="./icon-192.png">
 <link rel="manifest" href="./manifest.webmanifest">
 <meta name="theme-color" content="#0d1320">
 <link rel="icon" href="./logo.svg" type="image/svg+xml">
 <link rel="stylesheet" href="./style.css">
+<meta property="og:image" content="https://merry8989-uk.github.io/pdf-toolkit/icon-512.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="PDF Toolkit — 102 free PDF &amp; photo tools">
+<meta name="twitter:description" content="Merge, split, compress, OCR and edit PDFs and photos in your browser. Nothing is uploaded.">
 </head>
 <body>
 <main>
@@ -17,27 +22,67 @@
     <h1>All tools</h1>
     <p class="lead"><span id="toolcount">102</span> tools that run entirely in your browser. Pick one — your file stays on your device.</p>
   </div>
+  <div class="search-wrap">
+    <span class="mag">🔍</span>
+    <input id="toolsearch" type="search" autocomplete="off" aria-label="Search tools" placeholder="Search all tools…">
+    <kbd>/</kbd>
+  </div>
+  <p class="hint" id="searchmeta"></p>
   <div class="jump" id="jump"></div>
   <div id="all"></div>
 </main>
 <script type="module">
-  import { siteChrome, REGISTRY, ALL_TOOLS } from "./app.js";
+  import { siteChrome, ALL_TOOLS } from "./app.js";
   siteChrome();
   document.getElementById("toolcount").textContent = ALL_TOOLS.length;
 
-  document.getElementById("jump").innerHTML = REGISTRY.flatMap((c) =>
-    c.groups.map((g) => `<a href="#g-${c.id}-${g.name.replace(/[^a-z0-9]+/gi, "-").toLowerCase()}">${g.name} (${g.tools.length})</a>`)
+  const slug = (s) => s.replace(/[^a-z0-9]+/gi, "-").toLowerCase();
+  const cats = [...new Set(ALL_TOOLS.map((t) => t.category))].map((id) => ({
+    id,
+    name: ALL_TOOLS.find((t) => t.category === id).categoryName,
+    groups: [...new Set(ALL_TOOLS.filter((t) => t.category === id).map((t) => t.group))],
+  }));
+
+  const all = document.getElementById("all");
+  const jump = document.getElementById("jump");
+  const input = document.getElementById("toolsearch");
+  const meta = document.getElementById("searchmeta");
+
+  jump.innerHTML = cats.flatMap((c) =>
+    c.groups.map((g) => `<a href="#g-${c.id}-${slug(g)}">${g} (${ALL_TOOLS.filter((t) => t.category === c.id && t.group === g).length})</a>`)
   ).join("");
 
-  document.getElementById("all").innerHTML = REGISTRY.map((cat) => `
-    <section class="cat" id="cat-${cat.id}">
-      <div class="cat-head"><h2>${cat.icon} ${cat.name} tools</h2><p>${cat.tagline}</p></div>
-      ${cat.groups.map((g) => `
-        <h3 class="grp" id="g-${cat.id}-${g.name.replace(/[^a-z0-9]+/gi, "-").toLowerCase()}">${g.name} <span class="count">${g.tools.length}</span></h3>
-        <div class="grid">
-          ${g.tools.map((t) => `<a class="card" href="./${t[0]}.html"><div class="t"><span class="ic">${g.icon}</span>${t[1]}</div><div class="d">${t[2]}</div></a>`).join("")}
-        </div>`).join("")}
-    </section>`).join("");
+  const matches = (t, q) =>
+    !q || (t.title + " " + t.desc + " " + t.group + " " + t.categoryName).toLowerCase().includes(q);
+
+  function render() {
+    const q = (input.value || "").trim().toLowerCase();
+    let html = "", shown = 0;
+    for (const c of cats) {
+      const catTools = ALL_TOOLS.filter((t) => t.category === c.id && matches(t, q));
+      if (!catTools.length) continue;
+      shown += catTools.length;
+      const groups = c.groups
+        .map((g) => ({ name: g, tools: catTools.filter((t) => t.group === g) }))
+        .filter((g) => g.tools.length);
+      html += `<section class="cat" id="cat-${c.id}">
+        <div class="cat-head"><h2>${c.name} tools</h2><p>${catTools.length} tool${catTools.length === 1 ? "" : "s"}</p></div>
+        ${groups.map((g) => `
+          <h3 class="grp" id="g-${c.id}-${slug(g.name)}">${g.name} <span class="count">${g.tools.length}</span></h3>
+          <div class="grid">${g.tools.map((t) => `<a class="card" href="./${t.id}.html"><div class="t"><span class="ic">${t.groupIcon}</span>${t.title}</div><div class="d">${t.desc}</div></a>`).join("")}</div>`).join("")}
+      </section>`;
+    }
+    all.innerHTML = html || `<p class="hint" style="margin-top:30px">No tool matches “${input.value.trim()}”. Try another word.</p>`;
+    meta.textContent = q ? `${shown} of ${ALL_TOOLS.length} tools match “${input.value.trim()}”` : "";
+    jump.style.display = q ? "none" : "";
+  }
+
+  input.addEventListener("input", render);
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "/" && document.activeElement !== input) { e.preventDefault(); input.focus(); }
+    if (e.key === "Escape" && document.activeElement === input) { input.value = ""; render(); input.blur(); }
+  });
+  render();
 </script>
 </body>
 </html>

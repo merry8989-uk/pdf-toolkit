@@ -15,7 +15,7 @@ mountTool({
     const { PDFDocument } = await ctx.loadPdfLib();
     const o = ctx.options;
     const sizes = { a4: [595.28, 841.89], letter: [612, 792], legal: [612, 1008], a5: [419.53, 595.28] };
-    const doc = await PDFDocument.load(await ctx.files[0].arrayBuffer(), { ignoreEncryption: true });
+    const doc = await ctx.loadPdf(ctx.files[0]);
     const [bw, bh] = sizes[o.size] || sizes.a4;
     doc.getPages().forEach((p) => {
       const { width, height } = p.getSize();

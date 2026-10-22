@@ -49,7 +49,7 @@ mountTool({
   onReset() { order = []; },
   async run(ctx) {
     const { PDFDocument } = await ctx.loadPdfLib();
-    const src = await PDFDocument.load(await ctx.files[0].arrayBuffer(), { ignoreEncryption: true });
+    const src = await ctx.loadPdf(ctx.files[0]);
     const total = src.getPageCount();
     let ord = ctx.options.order.split(",").map((s) => parseInt(s.trim(), 10)).filter((n) => n >= 1 && n <= total);
     if (!ord.length && order.length) ord = order.slice();

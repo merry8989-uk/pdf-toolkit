@@ -19,7 +19,7 @@ mountTool({
     const o = ctx.options;
     const text = (o.text || "").trim();
     if (!text) throw new Error("Type the watermark text.");
-    const doc = await PDFDocument.load(await ctx.files[0].arrayBuffer(), { ignoreEncryption: true });
+    const doc = await ctx.loadPdf(ctx.files[0]);
     const font = await doc.embedFont(StandardFonts.HelveticaBold);
     const colors = { gray: rgb(0.5, 0.5, 0.5), red: rgb(0.85, 0.15, 0.15), blue: rgb(0.15, 0.3, 0.8) };
     const size = Number(o.size) || 54, opacity = Number(o.opacity) || 0.18, ang = parseInt(o.angle, 10);

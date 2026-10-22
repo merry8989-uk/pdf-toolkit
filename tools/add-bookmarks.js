@@ -20,7 +20,7 @@ mountTool({
     if (!parsed.length) throw new Error('Add at least one line like "Introduction, 1".');
 
     const { PDFDocument, PDFName, PDFHexString, PDFNumber } = await ctx.loadPdfLib();
-    const doc = await PDFDocument.load(await ctx.files[0].arrayBuffer(), { ignoreEncryption: true });
+    const doc = await ctx.loadPdf(ctx.files[0]);
     const total = doc.getPageCount();
     const entries = parsed.filter((e) => e.page >= 1 && e.page <= total).sort((a, b) => a.page - b.page);
     if (!entries.length) throw new Error(`Every page number is outside the document (1–${total}).`);

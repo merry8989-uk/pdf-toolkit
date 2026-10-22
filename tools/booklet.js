@@ -12,7 +12,7 @@ mountTool({
   ],
   async run(ctx) {
     const { PDFDocument } = await ctx.loadPdfLib();
-    const src = await PDFDocument.load(await ctx.files[0].arrayBuffer(), { ignoreEncryption: true });
+    const src = await ctx.loadPdf(ctx.files[0]);
     const idxs = src.getPageIndices();
     if (idxs.length < 2) throw new Error("A booklet needs at least two pages.");
     let n = idxs.length;

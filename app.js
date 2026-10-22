@@ -384,6 +384,63 @@ export function withDpi(u8, mime, dpi) {
   return u8;
 }
 
+/* Sentinel thrown by ctx.checkCancel() when the user presses Cancel. */
+const CANCEL = "__pdftoolkit_cancelled__";
+
+/* ---------- file type sniffing (by content, not extension) ---------- */
+const IMG_SIGS = [
+  [0xff, 0xd8, 0xff],            // JPEG
+  [0x89, 0x50, 0x4e, 0x47],       // PNG
+  [0x47, 0x49, 0x46, 0x38],       // GIF
+  [0x42, 0x4d],                   // BMP
+  [0x49, 0x49, 0x2a, 0x00],       // TIFF (little endian)
+  [0x4d, 0x4d, 0x00, 0x2a],       // TIFF (big endian)
+];
+
+/** "pdf" | "image" | "other" — decided from the leading bytes. */
+export function sniffKind(head) {
+  if (!head || head.length < 4) return "other";
+  if (head[0] === 0x25 && head[1] === 0x50 && head[2] === 0x44 && head[3] === 0x46) return "pdf";
+  for (const s of IMG_SIGS) if (s.every((v, i) => head[i] === v)) return "image";
+  if (head[0] === 0x52 && head[1] === 0x49 && head[2] === 0x46 && head[3] === 0x46) return "image"; // RIFF/WebP
+  if (head[4] === 0x66 && head[5] === 0x74 && head[6] === 0x79 && head[7] === 0x70) return "image"; // HEIC/AVIF
+  return "other";
+}
+
+/**
+ * Load a PDF with friendly errors instead of pdf-lib's parser messages.
+ * Catches three things that used to fail silently or cryptically:
+ *   - a file that is not a PDF at all
+ *   - a damaged file
+ *   - a password-protected file (which used to "work" but produce junk)
+ * Pass { password } to open an encrypted file, as the Unlock tool does.
+ */
+export async function loadPdf(input, opts = {}) {
+  const bytes = (input instanceof ArrayBuffer || input instanceof Uint8Array)
+    ? input
+    : await input.arrayBuffer();
+  const head = bytes instanceof Uint8Array ? bytes.subarray(0, 16) : new Uint8Array(bytes.slice(0, 16));
+  if (sniffKind(head) !== "pdf") {
+    throw new Error("That file is not a PDF — check that you picked the right one.");
+  }
+  const { PDFDocument } = await loadPdfLib();
+  let doc;
+  try {
+    doc = await PDFDocument.load(bytes, { ignoreEncryption: true, throwOnInvalidObject: false, ...opts });
+  } catch (e) {
+    throw new Error("This PDF could not be read — it may be damaged. Try the Repair PDF tool.");
+  }
+  if (doc.isEncrypted && !opts.password) {
+    throw new Error("This PDF is password-protected, so it cannot be changed yet. Open it with Unlock PDF first (you will need the password).");
+  }
+  let pages = 0;
+  try { pages = doc.getPageCount(); } catch (e) { pages = 0; }
+  if (!pages) {
+    throw new Error("This PDF has no readable pages — the file looks damaged. Try the Repair PDF tool.");
+  }
+  return doc;
+}
+
 /* ---------- font coverage ---------- */
 // The built-in PDF fonts use WinAnsiEncoding: Latin-1 plus a handful of
 // typographic extras. Anything else (₹, Devanagari, emoji, CJK) has no glyph.
@@ -704,6 +761,7 @@ export function mountTool(cfg) {
     <div class="panel">
       <div class="row">
         <button class="btn" id="go" disabled>${cfg.action || "Process"}</button>
+        <button class="btn ghost sm" id="cancel" style="display:none" type="button">Cancel</button>
         <button class="btn ghost sm" id="reset">Reset</button>
       </div>
       <div class="progress" id="progress"><i></i></div>
@@ -716,7 +774,7 @@ export function mountTool(cfg) {
   if (isNew) document.body.insertBefore(main, footer);
 
   const $ = (s) => main.querySelector(s);
-  const drop = $("#drop"), input = $("#file"), filelist = $("#filelist"),
+  const drop = $("#drop"), input = $("#file"), filelist = $("#filelist"), cancelBtn = $("#cancel"),
     extra = $("#extra"), optsBox = $("#opts"), go = $("#go"), reset = $("#reset"),
     progress = $("#progress"), bar = progress.querySelector("i"), out = $("#out");
 
@@ -769,8 +827,8 @@ export function mountTool(cfg) {
     optsBox.appendChild(wrap);
     opts[f.name] = el;
   }
-  if (!cfg.options || !cfg.options.length) $("#p-opts").style.display = "none";
-  if (cfg.noFile) $("#p-drop").style.display = "none";
+  // Remember this tool's settings between visits, so you don't re-enter them.
+  const OPT_KEY = "pdftk:opts:" + cfg.id;
 
   function readOpts() {
     const o = {};
@@ -780,8 +838,35 @@ export function mountTool(cfg) {
         : el.dataset.kind === "number" || el.dataset.kind === "range" ? parseFloat(el.value)
         : el.value;
     }
+    try { localStorage.setItem(OPT_KEY, JSON.stringify(o)); } catch (e) { /* private mode */ }
     return o;
   }
+
+  function restoreOpts() {
+    let saved = null;
+    try { saved = JSON.parse(localStorage.getItem(OPT_KEY) || "null"); } catch (e) { saved = null; }
+    if (!saved || typeof saved !== "object") return;
+    for (const k in saved) {
+      const el = opts[k];
+      if (!el) continue;
+      if (el.dataset.kind === "checkbox") el.checked = !!saved[k];
+      else el.value = saved[k];
+    }
+  }
+
+  if (!cfg.options || !cfg.options.length) $("#p-opts").style.display = "none";
+  else restoreOpts();
+  if (cfg.noFile) $("#p-drop").style.display = "none";
+
+  // Record this tool as recently used (the home page shows the last few).
+  try {
+    const key = "pdftk:recent";
+    const list = JSON.parse(localStorage.getItem(key) || "[]").filter((x) => x !== cfg.id);
+    list.unshift(cfg.id);
+    localStorage.setItem(key, JSON.stringify(list.slice(0, 8)));
+  } catch (e) { /* private mode */ }
+
+  let cancelRequested = false;
 
   const ctx = {
     files,
@@ -796,11 +881,25 @@ export function mountTool(cfg) {
     fileToImage, canvasOf, canvasBlob, hexToRgb, anchorXY, ANCHORS,
     PHOTO_FILTERS, applyFilter, adjustCanvas, sharpenCanvas, rotCanvas, fitCanvas, flipCanvas,
     pixelMap, rgbToHex, canvasFrom, regionPicker, readExif,
-    unsupportedChars, glyphWarning,
+    unsupportedChars, glyphWarning, sniffKind, loadPdf,
     DPI_MIN, DPI_MAX, clampDpi, rasterSize, checkRaster, maxDpiFor, mmToPx, withDpi, setJpegDpi, setPngDpi,
-    progress(p) { progress.classList.add("on"); bar.style.width = Math.max(0, Math.min(1, p)) * 100 + "%"; },
+    // Nearly every long loop already reports progress once per page, so the
+    // cancel check lives here and every one of those tools becomes stoppable.
+    progress(p) {
+      if (cancelRequested) throw new Error(CANCEL);
+      progress.classList.add("on");
+      bar.style.width = Math.max(0, Math.min(1, p)) * 100 + "%";
+    },
     progressDone() { bar.style.width = "100%"; setTimeout(() => { progress.classList.remove("on"); bar.style.width = "0"; }, 500); },
-    setBusy(b, label) { go.disabled = b || (!cfg.noFile && !files.length); if (label) go.textContent = label; },
+    setBusy(b, label) {
+      go.disabled = b || (!cfg.noFile && !files.length);
+      if (label) go.textContent = label;
+      cancelBtn.style.display = b ? "" : "none";
+      if (b) cancelBtn.textContent = "Cancel";
+    },
+    /** Call inside long loops so the Cancel button actually stops the work. */
+    checkCancel() { if (cancelRequested) throw new Error(CANCEL); },
+    get cancelRequested() { return cancelRequested; },
   };
 
   function renderFiles() {
@@ -828,8 +927,27 @@ export function mountTool(cfg) {
     if (cfg.onFiles) Promise.resolve(cfg.onFiles(ctx)).catch((e) => toast(e.message || String(e), true));
   }
 
+  // What does this tool actually accept? Derived from its `accept` attribute so
+  // every tool gets the check for free.
+  const wantsPdf = /pdf/i.test(cfg.accept || "");
+  const wantsImg = /image/i.test(cfg.accept || "");
+
   async function accept(list) {
-    const picked = [...list];
+    const arr = [...list];
+    const picked = [];
+    const rejected = [];
+    for (const f of arr) {
+      if (!wantsPdf && !wantsImg) { picked.push(f); continue; }
+      const head = new Uint8Array(await f.slice(0, 16).arrayBuffer());
+      const kind = sniffKind(head);
+      const ok = (wantsPdf && kind === "pdf") || (wantsImg && kind === "image");
+      (ok ? picked : rejected).push(f);
+    }
+    if (rejected.length) {
+      const expect = wantsPdf && wantsImg ? "a PDF or an image" : wantsPdf ? "a PDF" : "an image";
+      const names = rejected.map((f) => f.name).join(", ");
+      toast(`${names} — that is not ${expect}, so it was skipped.`, true);
+    }
     if (!cfg.multiple) files = picked.slice(0, 1);
     else files = files.concat(picked);
     renderFiles();
@@ -847,9 +965,17 @@ export function mountTool(cfg) {
     if (cfg.onReset) cfg.onReset(ctx);
   });
 
+  cancelBtn.addEventListener("click", () => {
+    cancelRequested = true;
+    cancelBtn.textContent = "Cancelling…";
+    cancelBtn.disabled = true;
+  });
+
   go.addEventListener("click", async () => {
     if (!cfg.noFile && !files.length) return;
     out.innerHTML = "";
+    cancelRequested = false;
+    cancelBtn.disabled = false;
     progress.classList.add("on");
     bar.style.width = "2%";
     ctx.setBusy(true, "Working…");
@@ -857,10 +983,15 @@ export function mountTool(cfg) {
       await cfg.run(ctx);
       ctx.progressDone();
     } catch (e) {
-      console.error(e);
-      toast(e?.message ? e.message : "Something went wrong", true);
+      if (String(e && e.message) === CANCEL) {
+        toast("Cancelled — nothing was saved.");
+      } else {
+        console.error(e);
+        toast(e?.message ? e.message : "Something went wrong", true);
+      }
       ctx.progressDone();
     } finally {
+      cancelRequested = false;
       ctx.setBusy(false, cfg.action || "Process");
     }
   });

@@ -9,7 +9,7 @@ mountTool({
   action: "Extract files",
   async run(ctx) {
     const { PDFDocument } = await ctx.loadPdfLib();
-    const doc = await PDFDocument.load(await ctx.files[0].arrayBuffer(), { ignoreEncryption: true });
+    const doc = await ctx.loadPdf(ctx.files[0]);
     const atts = doc.getAttachments() || {};
     const list = Object.values(atts).filter((a) => a && a.data);
     if (!list.length) {

@@ -10,7 +10,7 @@ mountTool({
   options: [{ name: "dates", label: "Also reset the created/modified dates", type: "checkbox", value: true }],
   async run(ctx) {
     const { PDFDocument } = await ctx.loadPdfLib();
-    const doc = await PDFDocument.load(await ctx.files[0].arrayBuffer(), { ignoreEncryption: true });
+    const doc = await ctx.loadPdf(ctx.files[0]);
     const had = [doc.getTitle(), doc.getAuthor(), doc.getSubject(), doc.getKeywords()].filter(Boolean).length;
     doc.setTitle("");
     doc.setAuthor("");

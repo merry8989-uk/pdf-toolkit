@@ -14,7 +14,7 @@ mountTool({
   async run(ctx) {
     const { PDFDocument } = await ctx.loadPdfLib();
     const o = ctx.options;
-    const src = await PDFDocument.load(await ctx.files[0].arrayBuffer(), { ignoreEncryption: true });
+    const src = await ctx.loadPdf(ctx.files[0]);
     const total = src.getPageCount();
     let sel = ctx.parseRanges(o.pages, total);
     if (!sel.length) sel = Array.from({ length: total }, (_, i) => i + 1);

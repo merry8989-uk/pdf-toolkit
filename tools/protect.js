@@ -17,7 +17,7 @@ mountTool({
     const o = ctx.options;
     const pw = (o.password || "").trim();
     if (!pw) throw new Error("Enter a password.");
-    const doc = await PDFDocument.load(await ctx.files[0].arrayBuffer(), { ignoreEncryption: true });
+    const doc = await ctx.loadPdf(ctx.files[0]);
     doc.encrypt({
       userPassword: pw,
       ownerPassword: (o.owner || "").trim() || pw,

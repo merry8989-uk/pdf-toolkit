@@ -12,7 +12,7 @@ mountTool({
   ],
   async run(ctx) {
     const { PDFDocument } = await ctx.loadPdfLib();
-    const src = await PDFDocument.load(await ctx.files[0].arrayBuffer(), { ignoreEncryption: true });
+    const src = await ctx.loadPdf(ctx.files[0]);
     const total = src.getPageCount();
     const viewer = await ctx.openDocument(await ctx.files[0].arrayBuffer());
     const limit = parseFloat(ctx.options.threshold);

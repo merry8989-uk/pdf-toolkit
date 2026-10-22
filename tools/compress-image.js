@@ -26,6 +26,7 @@ const drawScaled = (ctx, scale, mime) => {
 async function fitToTarget(ctx, mime, targetBytes) {
   let scale = 1;
   for (let attempt = 0; attempt < 12; attempt++) {
+    ctx.checkCancel();
     const canvas = drawScaled(ctx, scale, mime);
     if (mime === "image/png") {
       const data = await enc(ctx, canvas, mime, 1);

@@ -21,7 +21,7 @@ mountTool({
     const list = [...(input?.files || [])];
     if (!list.length) throw new Error("Choose at least one file to embed.");
     const { PDFDocument } = await ctx.loadPdfLib();
-    const doc = await PDFDocument.load(await ctx.files[0].arrayBuffer(), { ignoreEncryption: true });
+    const doc = await ctx.loadPdf(ctx.files[0]);
     let added = 0;
     for (const f of list) {
       const data = new Uint8Array(await f.arrayBuffer());

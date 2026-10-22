@@ -19,7 +19,7 @@ mountTool({
   async run(ctx) {
     const { PDFDocument, StandardFonts, rgb } = await ctx.loadPdfLib();
     const o = ctx.options;
-    const doc = await PDFDocument.load(await ctx.files[0].arrayBuffer(), { ignoreEncryption: true });
+    const doc = await ctx.loadPdf(ctx.files[0]);
     const font = await doc.embedFont(StandardFonts.Helvetica);
     const pages = doc.getPages();
     const start = Number(o.start) || 1, size = Number(o.size) || 12, m = 26;

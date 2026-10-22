@@ -16,7 +16,7 @@ mountTool({
   async run(ctx) {
     const { PDFDocument } = await ctx.loadPdfLib();
     const o = ctx.options;
-    const doc = await PDFDocument.load(await ctx.files[0].arrayBuffer(), { ignoreEncryption: true });
+    const doc = await ctx.loadPdf(ctx.files[0]);
     const t = +o.top / 100, b = +o.bottom / 100, l = +o.left / 100, r = +o.right / 100;
     if (l + r >= 1 || t + b >= 1) throw new Error("Crop percentages are too large — nothing would remain.");
     doc.getPages().forEach((p) => {

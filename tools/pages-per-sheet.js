@@ -14,7 +14,7 @@ mountTool({
   async run(ctx) {
     const { PDFDocument } = await ctx.loadPdfLib();
     const o = ctx.options;
-    const src = await PDFDocument.load(await ctx.files[0].arrayBuffer(), { ignoreEncryption: true });
+    const src = await ctx.loadPdf(ctx.files[0]);
     const idxs = src.getPageIndices();
     if (!idxs.length) throw new Error("This PDF has no pages.");
     const out = await PDFDocument.create();

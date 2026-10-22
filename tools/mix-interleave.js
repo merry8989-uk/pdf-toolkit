@@ -10,8 +10,8 @@ mountTool({
   async run(ctx) {
     if (ctx.files.length !== 2) throw new Error("Add exactly two PDF files.");
     const { PDFDocument } = await ctx.loadPdfLib();
-    const a = await PDFDocument.load(await ctx.files[0].arrayBuffer(), { ignoreEncryption: true });
-    const b = await PDFDocument.load(await ctx.files[1].arrayBuffer(), { ignoreEncryption: true });
+    const a = await ctx.loadPdf(ctx.files[0]);
+    const b = await ctx.loadPdf(ctx.files[1]);
     const out = await PDFDocument.create();
     const ai = a.getPageIndices(), bi = b.getPageIndices();
     const n = Math.max(ai.length, bi.length);

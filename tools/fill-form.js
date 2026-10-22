@@ -13,7 +13,7 @@ mountTool({
     fields = [];
     ctx.extra.innerHTML = "";
     const { PDFDocument, PDFTextField, PDFCheckBox, PDFRadioGroup, PDFDropdown, PDFOptionList } = await ctx.loadPdfLib();
-    const doc = await PDFDocument.load(await ctx.files[0].arrayBuffer(), { ignoreEncryption: true });
+    const doc = await ctx.loadPdf(ctx.files[0]);
     const list = doc.getForm().getFields();
     if (!list.length) {
       ctx.extra.innerHTML = `<p class="hint">This PDF has no fillable form fields.</p>`;
@@ -71,7 +71,7 @@ mountTool({
   async run(ctx) {
     if (!fields.length) throw new Error("No form fields were found in this PDF.");
     const { PDFDocument, PDFCheckBox, PDFRadioGroup, PDFDropdown, PDFOptionList, PDFTextField } = await ctx.loadPdfLib();
-    const doc = await PDFDocument.load(await ctx.files[0].arrayBuffer(), { ignoreEncryption: true });
+    const doc = await ctx.loadPdf(ctx.files[0]);
     const live = doc.getForm().getFields();
     let filled = 0;
     fields.forEach((rec, i) => {
