@@ -38,7 +38,7 @@ mountTool({
     const { PDFDocument, StandardFonts, rgb } = await ctx.loadPdfLib();
     const o = ctx.options;
     const doc = await PDFDocument.create();
-    const f = await doc.embedFont(StandardFonts[o.font] || StandardFonts.Helvetica);
+    const f = await ctx.fontFor(doc, text, { bold: /Bold/.test(o.font || ""), stdKey: o.font });
     const dims = { a4: [595.28, 841.89], letter: [612, 792] };
     const [pw, ph] = dims[o.page] || dims.a4;
     const m = Number(o.margin) || 56;
@@ -58,7 +58,7 @@ mountTool({
     }
     const bytes = await doc.save();
     ctx.download(bytes, "text.pdf");
-    ctx.out.innerHTML = `<p class="hint">✓ Created <b>text.pdf</b> — ${doc.getPageCount()} page(s) from ${lines.length} line(s).${ctx.glyphWarning(text)}</p>`;
+    ctx.out.innerHTML = `<p class="hint">✓ Created <b>text.pdf</b> — ${doc.getPageCount()} page(s) from ${lines.length} line(s).${ctx.unicodeNote(doc)}${ctx.glyphWarning(text)}</p>`;
   },
   help: "<p>Text is wrapped to the page width and paginated automatically. Blank lines are preserved as paragraph breaks.</p>",
 });

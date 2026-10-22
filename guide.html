@@ -28,6 +28,7 @@
     <div class="card"><div class="t">Tesseract (WASM)</div><div class="d">Recognises text in scans for the OCR tool, running in a background worker with its English language data bundled with the site.</div></div>
     <div class="card"><div class="t">Web Crypto</div><div class="d">Generates the random keys, salts and initialisation vectors used when you password-protect a PDF with AES-256.</div></div>
     <div class="card"><div class="t">A tiny ZIP writer</div><div class="d">When a tool produces several files, they are bundled into a ZIP locally — with about a hundred lines of code and no dependency.</div></div>
+    <div class="card"><div class="t">Noto Sans (pre-subset)</div><div class="d">The built-in PDF fonts only cover Latin text. When your text contains ₹, Devanagari, arrows or maths symbols, a pre-subset Noto Sans is embedded instead and shaped correctly — Devanagari conjuncts included. It loads only when it is actually needed.</div></div>
   </div>
 
   <h2>How to verify the privacy claim</h2>
@@ -35,9 +36,15 @@
     <p>Open your browser's developer tools, go to the <b>Network</b> tab, and use any tool. You will see the page's own assets load, and nothing else — no request carrying your document leaves the device. The libraries are served from this site's own origin, not from a third-party CDN, so there is no external service in the path at all.</p>
   </div>
 
+  <h2>Writing in Hindi, or with the ₹ sign</h2>
+  <div class="panel">
+    <p>The fonts built into PDF only cover Latin characters, so the text tools normally use those and keep your file small. If what you type contains the rupee sign <b>₹</b>, Devanagari, Latin Extended, arrows or maths symbols, the tool switches to an embedded Noto Sans instead, and shapes the text properly — a Devanagari conjunct such as क्ष comes out as one joined glyph rather than three separate ones. Both decisions are made per run of text, so an English heading and a Hindi paragraph can live in the same document. This adds roughly 50–90&nbsp;KB to the file, and only when such text is used.</p>
+    <p>Chinese, Japanese, Korean and emoji are not bundled — those fonts are many megabytes each. If a character cannot be drawn, the tool names it rather than quietly leaving a blank.</p>
+  </div>
+
   <h2>What a browser cannot do (yet)</h2>
   <div class="panel">
-    <p>High-fidelity conversion between Office formats (Word, Excel, PowerPoint) and PDF needs a desktop-class layout engine such as LibreOffice, which does not run in a browser tab. AI summarising and translation need a model server. Those are deliberately not offered here rather than offered badly. Everything else — the day-to-day PDF and image work, including OCR — runs client-side.</p>
+    <p>High-fidelity conversion between Office formats (Word, Excel, PowerPoint) and PDF needs a desktop-class layout engine such as LibreOffice, which does not run in a browser tab. AI summarising and translation need a model server. Those are deliberately not offered here rather than offered badly. Everything else — the day-to-day PDF and image work, including OCR and non-Latin text — runs client-side.</p>
   </div>
 
   <h2>Questions</h2>

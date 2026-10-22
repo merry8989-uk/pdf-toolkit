@@ -152,7 +152,7 @@ async function addPage(ctx, doc, rgb, StandardFonts, canvas, words, w, h) {
   const blob = await ctx.canvasBlob(canvas, "image/jpeg", 0.85);
   const img = await doc.embedJpg(new Uint8Array(await blob.arrayBuffer()));
   page.drawImage(img, { x: 0, y: 0, width: w * pt, height: h * pt });
-  const font = await doc.embedFont(StandardFonts.Helvetica);
+  const font = await ctx.fontFor(doc, words.map((w) => w.text || "").join(" "), {});
   for (const word of words) {
     const b = word.bbox || {};
     const size = Math.max(3, (b.y1 - b.y0) * 0.85 * pt);

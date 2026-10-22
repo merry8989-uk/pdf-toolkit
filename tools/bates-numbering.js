@@ -24,7 +24,7 @@ mountTool({
     const { PDFDocument, StandardFonts, rgb } = await ctx.loadPdfLib();
     const o = ctx.options;
     const doc = await ctx.loadPdf(ctx.files[0]);
-    const font = await doc.embedFont(StandardFonts.Helvetica);
+    const font = await ctx.fontFor(doc, (o.prefix || "") + (o.suffix || ""), {});
     const size = Number(o.size) || 9;
     const digits = Math.min(Math.max(1, o.digits | 0), 12);
     const start = o.start | 0;
@@ -41,7 +41,7 @@ mountTool({
 
     const bytes = await doc.save();
     ctx.download(bytes, "bates.pdf");
-    ctx.out.innerHTML = `<p class="hint">✓ Stamped ${doc.getPageCount()} page(s), starting at <b>${(o.prefix || "") + String(start).padStart(digits, "0")}</b>.${ctx.glyphWarning((o.prefix || "") + (o.suffix || ""))}</p>`;
+    ctx.out.innerHTML = `<p class="hint">✓ Stamped ${doc.getPageCount()} page(s), starting at <b>${(o.prefix || "") + String(start).padStart(digits, "0")}</b>.${ctx.unicodeNote(doc)}${ctx.glyphWarning((o.prefix || "") + (o.suffix || ""))}</p>`;
   },
   help: "<p>Bates numbering is used in legal discovery to give every page a unique, sequential identifier. The number is zero-padded so the stamps line up in order.</p>",
 });

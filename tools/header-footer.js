@@ -19,7 +19,8 @@ mountTool({
     const { PDFDocument, StandardFonts, rgb } = await ctx.loadPdfLib();
     const o = ctx.options;
     const doc = await ctx.loadPdf(ctx.files[0]);
-    const font = await doc.embedFont(StandardFonts.Helvetica);
+    const fontH = await ctx.fontFor(doc, o.header || "", {});
+    const fontF = await ctx.fontFor(doc, (o.footer || "") + (o.numbers ? "1" : ""), {});
     const pages = doc.getPages();
     const total = pages.length;
     const size = Number(o.size) || 9;
@@ -29,19 +30,19 @@ mountTool({
     pages.forEach((p, i) => {
       if (o.skip && i === 0) return;
       const { width, height } = p.getSize();
-      const put = (text, y) => {
+      const put = (text, y, font) => {
         if (!text) return;
         const w = font.widthOfTextAtSize(text, size);
         p.drawText(text, { x: Math.max(6, (width - w) / 2), y, size, font, color: col });
       };
-      if (o.header) put(o.header, height - m - size + 2);
+      if (o.header) put(o.header, height - m - size + 2, fontH);
       const foot = [o.footer, o.numbers ? `Page ${i + 1} of ${total}` : ""].filter(Boolean).join("   ·   ");
-      if (foot) put(foot, m - size);
+      if (foot) put(foot, m - size, fontF);
     });
 
     const bytes = await doc.save();
     ctx.download(bytes, "headered.pdf");
-    ctx.out.innerHTML = `<p class="hint">✓ Added a header/footer to ${o.skip ? total - 1 : total} page(s).${ctx.glyphWarning((o.header || "") + (o.footer || ""))}</p>`;
+    ctx.out.innerHTML = `<p class="hint">✓ Added a header/footer to ${o.skip ? total - 1 : total} page(s).${ctx.unicodeNote(doc)}${ctx.glyphWarning((o.header || "") + (o.footer || ""))}</p>`;
   },
   help: "<p>Header text sits near the top edge and footer text near the bottom, both centred. Leave either field blank to skip it.</p>",
 });

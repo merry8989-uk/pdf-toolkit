@@ -166,21 +166,58 @@ The three methods for a PDF, at a glance:
 | Re-render at a DPI | No | 50–95% | When you know the resolution you want |
 | Hit a target size | No | Whatever is needed | Upload limits and email |
 
-## Font coverage
+## Convenience & safety
+
+- **Search.** The home page and the tools directory have a search box covering all
+  102 tools — press `/` anywhere to jump to it, `Esc` to clear.
+- **Cancel.** Long jobs (compressing, OCR, high-DPI rendering) show a **Cancel**
+  button. It is checked once per page, so it stops promptly and saves nothing.
+- **Remembered settings.** Each tool remembers your last options, so you don't
+  re-enter them on the next visit.
+- **Recently used.** The home page shows your last few tools at the top.
+- **Friendly errors.** Files are identified by their *contents*, not their
+  extension, so dropping a `.docx` on a PDF tool says so plainly instead of
+  showing a parser error. Password-protected PDFs are detected and you are told
+  to use Unlock PDF first — previously they "worked" and produced junk output.
+  Damaged and zero-page files are also reported clearly.
+
+## Unicode text — ₹, Devanagari and more
 
 The PDF text tools (watermark, header & footer, stamps, add text, Bates
-numbering, Create PDF, Text to PDF) draw with the built-in PDF fonts, which use
-WinAnsiEncoding: Latin-1 plus common typographic characters such as the em dash,
-curly quotes, ellipsis, bullet and degree sign.
+numbering, page numbers, Create PDF, Text to PDF) can now draw text in scripts
+the built-in PDF fonts cannot handle.
 
-Characters outside that set — the **rupee sign ₹**, Devanagari and other Indic
-scripts, CJK, emoji — have no glyph in those fonts. They are not silently
-dropped any more: the tool tells you which characters could not be drawn. To
-render them properly you would need to embed a Unicode font, which is a
-substantial addition; it is on the roadmap rather than pretended.
+How it works:
 
-Bookmark titles are a different case: they are written as UTF-16 strings, so
-they **do** carry ₹, Devanagari and emoji correctly.
+- Text made only of WinAnsi characters (Latin-1 plus the em dash, curly quotes,
+ellipsis, bullet, degree) keeps using the built-in fonts, so those PDFs stay
+small — a one-line document is about 1 KB.
+- Text containing anything else — the **rupee sign ₹**, Devanagari, Latin
+Extended, arrows, maths symbols — switches to an embedded **Noto Sans** subset
+and is shaped properly. Devanagari conjuncts work: क्ष renders as one glyph, not
+three.
+- Both the font choice and the shaping are decided per text run, so a heading in
+Hindi and a paragraph in English can share one document.
+
+**Cost.** Embedding a Unicode font adds roughly 50–90 KB to the output PDF, and
+only when such text is actually used. The tool tells you when it has done so.
+
+**What is still not covered:** CJK (Chinese, Japanese, Korean) and emoji. Those
+need fonts of many megabytes each, so they are not bundled; the tool names any
+characters it could not draw rather than silently dropping them.
+
+Two implementation notes, since they are the kind of thing that is easy to get
+wrong:
+
+- pdf-lib's runtime font subsetting throws with the fontkit build we ship, so
+the fonts are **pre-subset at build time** with `pyftsubset` (Latin subset
+139 KB, Devanagari 119 KB) and embedded whole. The PDF stream is compressed, so
+the real cost is the 50–90 KB above.
+- fontkit's Indic shaper needs `regeneratorRuntime`, so that 7 KB shim is loaded
+before fontkit. Both load lazily, only when Unicode text is first used.
+
+Bookmark titles are a separate case: they are written as UTF-16 strings, so they
+already carried ₹, Devanagari and emoji correctly.
 
 ## Honest limits
 

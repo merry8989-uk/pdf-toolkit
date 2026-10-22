@@ -26,7 +26,7 @@ mountTool({
     const colors = { red: rgb(0.78, 0.1, 0.12), green: rgb(0.1, 0.55, 0.25), blue: rgb(0.12, 0.3, 0.75), gray: rgb(0.35, 0.35, 0.38) };
     const color = colors[o.color] || colors.red;
     const doc = await ctx.loadPdf(ctx.files[0]);
-    const font = await doc.embedFont(StandardFonts.HelveticaBold);
+    const font = await ctx.fontFor(doc, text, { bold: true });
     const size = Number(o.size) || 30;
     const op = Number(o.opacity) || 0.75;
     const ang = parseInt(o.angle, 10) || 0;
@@ -43,7 +43,7 @@ mountTool({
 
     const bytes = await doc.save();
     ctx.download(bytes, "stamped.pdf");
-    ctx.out.innerHTML = `<p class="hint">✓ Applied the “${text.trim()}” stamp to ${doc.getPageCount()} page(s).${ctx.glyphWarning(text)}</p>`;
+    ctx.out.innerHTML = `<p class="hint">✓ Applied the “${text.trim()}” stamp to ${doc.getPageCount()} page(s).${ctx.unicodeNote(doc)}${ctx.glyphWarning(text)}</p>`;
   },
   help: "<p>Each page gets a bordered stamp centred on it. Lower the opacity so the underlying text stays readable.</p>",
 });

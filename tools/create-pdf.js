@@ -158,12 +158,10 @@ mountTool({
     const editorBasePx = parseFloat(getComputedStyle(editor).fontSize) || 15;
     const scale = base / editorBasePx;
 
-    const fontCache = new Map();
-    const getFont = async (family, bold, italic) => {
-      const key = stdKey(family, bold, italic);
-      if (!fontCache.has(key)) fontCache.set(key, await doc.embedFont(StandardFonts[key]));
-      return fontCache.get(key);
-    };
+    // ctx.fontFor keeps the chosen built-in family for plain text and switches
+    // to an embedded Noto font only for runs the built-in fonts cannot draw.
+    const getFont = (family, bold, italic, text) =>
+      ctx.fontFor(doc, text || "", { bold, stdKey: stdKey(family, bold, italic) });
 
     let page = doc.addPage([PW, PH]);
     let y = PH - margin;
@@ -182,7 +180,7 @@ mountTool({
       let line = [], lineW = 0;
 
       for (const run of runs) {
-        const f = await getFont(run.font, run.bold, run.italic);
+        const f = await getFont(run.font, run.bold, run.italic, run.text);
         const sz = (run.size || blockPx) * scale;
         for (const tok of run.text.split(/(\s+)/)) {
           if (!tok) continue;
@@ -255,7 +253,7 @@ mountTool({
       if (b.type === "bullet" || b.type === "number") {
         if (y - size * leading < margin) newPage();
         y -= size * leading;
-        const f = await getFont(null, false, false);
+        const f = await getFont(null, false, false, b.marker);
         page.drawText(b.marker, { x: margin, y: y + size * leading * 0.24, size, font: f, color: rgb(0.35, 0.37, 0.42) });
       }
       await drawLine(b.runs, { sizePx, indent, align, color: b.color });
@@ -263,7 +261,7 @@ mountTool({
     }
 
     if (o.numbers) {
-      const f = await getFont(null, false, false);
+      const f = await getFont(null, false, false, "1");
       const pages = doc.getPages();
       pages.forEach((p, i) => {
         const label = String(i + 1);
@@ -275,7 +273,7 @@ mountTool({
     const bytes = await doc.save();
     ctx.download(bytes, "document.pdf");
     const blankOnly = !blocks.length;
-    ctx.out.innerHTML = `<p class="hint">✓ Created <b>document.pdf</b> — ${doc.getPageCount()} page(s)${blankOnly ? " (blank)" : ", with selectable text"}${o.numbers ? ", numbered" : ""}.${ctx.glyphWarning(editor.textContent)}</p>`;
+    ctx.out.innerHTML = `<p class="hint">✓ Created <b>document.pdf</b> — ${doc.getPageCount()} page(s)${blankOnly ? " (blank)" : ", with selectable text"}${o.numbers ? ", numbered" : ""}.${ctx.unicodeNote(doc)}${ctx.glyphWarning(editor.textContent)}</p>`;
   },
   help: "<p>The editor is a real rich-text surface. On export the document is walked block by block, formatted text runs are measured with the actual PDF fonts, and the text is laid out with word wrapping, alignment, lists and page breaks. The output is a normal PDF with <b>selectable, searchable text</b> — not an image.</p>",
 });

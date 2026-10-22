@@ -20,7 +20,7 @@ mountTool({
     const text = (o.text || "").trim();
     if (!text) throw new Error("Type the watermark text.");
     const doc = await ctx.loadPdf(ctx.files[0]);
-    const font = await doc.embedFont(StandardFonts.HelveticaBold);
+    const font = await ctx.fontFor(doc, text, { bold: true });
     const colors = { gray: rgb(0.5, 0.5, 0.5), red: rgb(0.85, 0.15, 0.15), blue: rgb(0.15, 0.3, 0.8) };
     const size = Number(o.size) || 54, opacity = Number(o.opacity) || 0.18, ang = parseInt(o.angle, 10);
     doc.getPages().forEach((p) => {
@@ -33,7 +33,7 @@ mountTool({
     });
     const bytes = await doc.save();
     ctx.download(bytes, "watermarked.pdf");
-    ctx.out.innerHTML = `<p class="hint">✓ Watermarked ${doc.getPageCount()} page(s).${ctx.glyphWarning(text)}</p>`;
+    ctx.out.innerHTML = `<p class="hint">✓ Watermarked ${doc.getPageCount()} page(s).${ctx.unicodeNote(doc)}${ctx.glyphWarning(text)}</p>`;
   },
   help: "<p>The same stamp is drawn centred on every page. Lower the opacity for a subtle, non-intrusive mark.</p>",
 });

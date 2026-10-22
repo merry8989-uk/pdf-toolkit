@@ -441,6 +441,101 @@ export async function loadPdf(input, opts = {}) {
   return doc;
 }
 
+/* ---------- Unicode fonts, embedded on demand ----------
+   The built-in PDF fonts only cover WinAnsi. When text contains anything else
+   (₹, Devanagari, …) we embed a Noto Sans subset instead.
+
+   Two things worth knowing:
+   - pdf-lib's runtime font subsetting is broken with the fontkit build we ship
+     (it throws on save), so the fonts below are PRE-SUBSET at build time with
+     pyftsubset and embedded whole. The PDF stream is compressed, so the real
+     cost is ~50-90 KB per document, and only when Unicode text is used.
+   - fontkit's Indic shaper needs regeneratorRuntime, so that shim is loaded
+     first, and both are loaded lazily via a <script> tag (the UMD bundle
+     registers itself on window).
+*/
+const FONT_FILES = {
+  latin: "vendor/fonts/NotoSans-Regular.ttf",
+  latinBold: "vendor/fonts/NotoSans-Bold.ttf",
+  deva: "vendor/fonts/NotoSansDevanagari-Regular.ttf",
+  devaBold: "vendor/fonts/NotoSansDevanagari-Bold.ttf",
+};
+
+let _fontkit = null;
+const _fontBytes = {};
+
+function loadScript(src) {
+  return new Promise((resolve, reject) => {
+    const s = document.createElement("script");
+    s.src = src;
+    s.onload = resolve;
+    s.onerror = () => reject(new Error("Could not load " + src));
+    document.head.appendChild(s);
+  });
+}
+
+export async function ensureFontkit() {
+  if (_fontkit) return _fontkit;
+  if (!globalThis.regeneratorRuntime) {
+    await loadScript(new URL("./vendor/regenerator.min.js", import.meta.url).href);
+  }
+  if (!globalThis.fontkit) {
+    await loadScript(new URL("./vendor/fontkit.umd.min.js", import.meta.url).href);
+  }
+  if (!globalThis.fontkit) throw new Error("The font engine could not be loaded. Reload the page and try again.");
+  _fontkit = globalThis.fontkit;
+  return _fontkit;
+}
+
+async function fontBytes(which) {
+  if (!_fontBytes[which]) {
+    const url = new URL("./" + FONT_FILES[which], import.meta.url).href;
+    const res = await fetch(url);
+    if (!res.ok) throw new Error("Could not load the Unicode font (" + which + ").");
+    _fontBytes[which] = new Uint8Array(await res.arrayBuffer());
+  }
+  return _fontBytes[which];
+}
+
+const hasDevanagari = (text) => /[\u0900-\u097F\uA8E0-\uA8FF]/.test(String(text || ""));
+
+/**
+ * Pick a font that can actually draw `text`.
+ * WinAnsi-clean text keeps the original built-in font (so output stays small);
+ * anything else gets an embedded Noto font.
+ */
+export async function fontFor(doc, text, { bold = false, stdKey = null } = {}) {
+  const { StandardFonts } = await loadPdfLib();
+  if (!unsupportedChars(text).length) {
+    const key = stdKey || (bold ? "HelveticaBold" : "Helvetica");
+    if (!doc.__stdFonts) doc.__stdFonts = new Map();
+    if (!doc.__stdFonts.has(key)) {
+      doc.__stdFonts.set(key, await doc.embedFont(StandardFonts[key] || StandardFonts.Helvetica));
+    }
+    return doc.__stdFonts.get(key);
+  }
+  const kit = await ensureFontkit();
+  if (!doc.__kitRegistered) {
+    doc.registerFontkit(kit);
+    doc.__kitRegistered = true;
+  }
+  const which = (hasDevanagari(text) ? "deva" : "latin") + (bold ? "Bold" : "");
+  if (!doc.__uniFonts) doc.__uniFonts = new Map();
+  if (!doc.__uniFonts.has(which)) {
+    const bytes = await fontBytes(which);
+    doc.__uniFonts.set(which, await doc.embedFont(bytes, { subset: false }));
+    doc.__uniEmbedded = true;
+  }
+  return doc.__uniFonts.get(which);
+}
+
+/** A sentence to append when a Unicode font had to be embedded. */
+export function unicodeNote(doc) {
+  return doc && doc.__uniEmbedded
+    ? " A Unicode font was embedded so those characters render properly (adds roughly 50–90 KB to the file)."
+    : "";
+}
+
 /* ---------- font coverage ---------- */
 // The built-in PDF fonts use WinAnsiEncoding: Latin-1 plus a handful of
 // typographic extras. Anything else (₹, Devanagari, emoji, CJK) has no glyph.
@@ -450,6 +545,7 @@ const WINANSI_EXTRA = new Set([
   0x2013, 0x2014, 0x02dc, 0x2122, 0x0161, 0x203a, 0x0153, 0x017e, 0x0178,
 ]);
 
+/** Characters the BUILT-IN fonts cannot draw — these trigger a Unicode font. */
 export function unsupportedChars(text) {
   const bad = new Set();
   for (const ch of String(text == null ? "" : text)) {
@@ -459,12 +555,32 @@ export function unsupportedChars(text) {
   return [...bad];
 }
 
-/** A sentence to append to a tool's result when text will not render. */
+// Coverage of the bundled Noto Sans subsets (see the font block above).
+const NOTO_RANGES = [
+  [0x0020, 0x024f], [0x02b0, 0x02ff], [0x0300, 0x036f], [0x0900, 0x097f],
+  [0x2000, 0x206f], [0x20a0, 0x20cf], [0x2100, 0x214f], [0x2150, 0x218f],
+  [0x2190, 0x21ff], [0x2200, 0x22ff], [0x25a0, 0x25ff], [0x2605, 0x2606],
+  [0xa8e0, 0xa8ff], [0xfb00, 0xfb06],
+];
+
+/** Characters that neither the built-in fonts nor the bundled Noto subsets have. */
+export function unrenderableChars(text) {
+  const bad = new Set();
+  for (const ch of String(text == null ? "" : text)) {
+    const n = ch.codePointAt(0);
+    if (n <= 0xff || WINANSI_EXTRA.has(n)) continue;
+    if (NOTO_RANGES.some(([a, b]) => n >= a && n <= b)) continue;
+    bad.add(ch);
+  }
+  return [...bad];
+}
+
+/** A sentence to append to a tool's result when text still will not render. */
 export function glyphWarning(text) {
-  const bad = unsupportedChars(text);
+  const bad = unrenderableChars(text);
   if (!bad.length) return "";
   const shown = bad.length <= 4 ? bad.join(" ") : bad.slice(0, 3).join(" ") + " …";
-  return ` <b>Note:</b> ${bad.length} character${bad.length > 1 ? "s" : ""} (${shown}) ${bad.length > 1 ? "are" : "is"} not in the built-in PDF fonts and may appear blank or substituted.`;
+  return ` <b>Note:</b> ${bad.length} character${bad.length > 1 ? "s" : ""} (${shown}) ${bad.length > 1 ? "are" : "is"} outside the fonts bundled with this app (CJK and emoji are not included), so ${bad.length > 1 ? "they" : "it"} may appear blank.`;
 }
 
 /* ---------- shared photo-editor helpers ---------- */
@@ -881,7 +997,8 @@ export function mountTool(cfg) {
     fileToImage, canvasOf, canvasBlob, hexToRgb, anchorXY, ANCHORS,
     PHOTO_FILTERS, applyFilter, adjustCanvas, sharpenCanvas, rotCanvas, fitCanvas, flipCanvas,
     pixelMap, rgbToHex, canvasFrom, regionPicker, readExif,
-    unsupportedChars, glyphWarning, sniffKind, loadPdf,
+    unsupportedChars, unrenderableChars, glyphWarning, sniffKind, loadPdf,
+    ensureFontkit, fontFor, unicodeNote,
     DPI_MIN, DPI_MAX, clampDpi, rasterSize, checkRaster, maxDpiFor, mmToPx, withDpi, setJpegDpi, setPngDpi,
     // Nearly every long loop already reports progress once per page, so the
     // cancel check lives here and every one of those tools becomes stoppable.

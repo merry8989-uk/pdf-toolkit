@@ -22,7 +22,7 @@ mountTool({
     if (!o.text || !o.text.trim()) throw new Error("Type the text to add.");
     const colors = { black: rgb(0, 0, 0), red: rgb(0.8, 0.1, 0.1), blue: rgb(0.1, 0.3, 0.8), gray: rgb(0.4, 0.4, 0.44) };
     const doc = await ctx.loadPdf(ctx.files[0]);
-    const font = await doc.embedFont(o.bold ? StandardFonts.HelveticaBold : StandardFonts.Helvetica);
+    const font = await ctx.fontFor(doc, o.text, { bold: !!o.bold });
     const total = doc.getPageCount();
     const sel = ctx.parseRanges(o.pages, total);
     const all = !sel.length;
@@ -39,7 +39,7 @@ mountTool({
     });
     const bytes = await doc.save();
     ctx.download(bytes, "annotated.pdf");
-    ctx.out.innerHTML = `<p class="hint">✓ Added text to ${all ? total : sel.length} page(s).${ctx.glyphWarning(o.text)}</p>`;
+    ctx.out.innerHTML = `<p class="hint">✓ Added text to ${all ? total : sel.length} page(s).${ctx.unicodeNote(doc)}${ctx.glyphWarning(o.text)}</p>`;
   },
   help: "<p>Positions are given as a percentage of the page, so the same setting lands in the same relative spot on any page size. 0% is the left/top edge.</p>",
 });
