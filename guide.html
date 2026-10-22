@@ -50,7 +50,7 @@
   <h2>Questions</h2>
   <details class="faq"><summary>Is my file uploaded anywhere?</summary><div class="body">No. The tools are static HTML, CSS and JavaScript. Your file is read into the tab's memory, processed there, and downloaded from there. There is no upload endpoint in the code.</div></details>
   <details class="faq"><summary>Why does a big PDF sometimes feel slow?</summary><div class="body">Because your device is doing the work. Very large files or high-resolution page rendering can be heavy on a low-powered phone. Splitting the document first usually helps.</div></details>
-  <details class="faq"><summary>Are the libraries loaded from a CDN?</summary><div class="body">No. pdf-lib and pdf.js are stored in this site's own <code>vendor/</code> folder and served from the same origin, which is what lets the Content-Security-Policy stay locked to 'self'.</div></details>
+  <details class="faq"><summary>Are the libraries loaded from a CDN?</summary><div class="body">No. pdf-lib, pdf.js, Tesseract, fontkit and the Noto Sans fonts are all stored in this site's own <code>vendor/</code> folder and served from the same origin. There is no third-party request anywhere in the app, which is what makes the privacy claim checkable: open the Network tab and every request goes to this domain.</div></details>
 </main>
 <script type="module">import { siteChrome } from "./app.js"; siteChrome();</script>
 </body>
