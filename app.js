@@ -8,7 +8,9 @@ import * as log from "./logger.js";
 export { createZip, crc32, REGISTRY, ALL_TOOLS };
 
 // Start collecting diagnostics straight away. Silent by design: nothing is
-// shown to the user, and nothing leaves the browser. See settings.html.
+// shown in the interface and nothing leaves the browser. The viewer is not
+// linked from anywhere — it is reachable only at /settings.html by direct URL,
+// which is the usual "hidden console" pattern for a debug screen.
 log.installGlobalHandlers();
 
 /* ---------- lazy library loaders (imported only when needed) ---------- */
@@ -784,7 +786,6 @@ function chrome(active) {
         ${ddHtml}
         <a href="./guide.html">Guide</a>
         <button class="theme-btn" title="Toggle theme" aria-label="Toggle theme">◐</button>
-        <a class="theme-btn" href="./settings.html" title="Settings" aria-label="Settings">⚙</a>
       </nav>
     </div>`;
   header.querySelectorAll(".dd-btn").forEach((btn) => {
@@ -833,7 +834,7 @@ function chrome(active) {
       <div class="foot-bottom">
         <span>© ${new Date().getFullYear()} PDF Toolkit — every file is processed in your browser, never uploaded.</span>
         <span class="foot-links">
-          <a href="./tools.html">All tools</a><a href="./guide.html">Guide</a><a href="./privacy.html">Privacy</a><a href="./terms.html">Terms</a><a href="./settings.html">Settings</a>
+          <a href="./tools.html">All tools</a><a href="./guide.html">Guide</a><a href="./privacy.html">Privacy</a><a href="./terms.html">Terms</a>
         </span>
       </div>
     </div>`;

@@ -24,7 +24,10 @@ const SET_KEY = "pdftk:logsettings";
 
 const DEFAULTS = {
   enabled: true,
-  activity: true,      // record navigation / tool usage
+  // Off by default. Since the log is not shown in the interface, it should hold
+  // diagnostics (errors, timings) rather than a record of what the person did.
+  // The viewer, if you open it by URL, can turn usage recording on.
+  activity: false,
   verbose: false,      // also record TRACE + DEBUG
   names: false,        // include file names in metadata
   retention: 500,      // max entries kept
