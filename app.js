@@ -73,6 +73,21 @@ export function download(data, name, mime = "application/pdf") {
   const blob = data instanceof Blob ? data : new Blob([data], { type: mime });
   // record the outcome, not the contents
   log.perf("Output written", { mime, size: blob.size });
+
+  // Inside the Android app the page is served from a WebView, where a blob:
+  // download never reaches the system downloader. Hand the bytes to the native
+  // side instead, which writes them into the device's Downloads folder. In a
+  // browser PDFToolkitBridge does not exist, so this is skipped entirely.
+  const bridge = typeof window !== "undefined" ? window.PDFToolkitBridge : null;
+  if (bridge && typeof bridge.saveFile === "function") {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const b64 = String(reader.result || "").split(",")[1] || "";
+      try { bridge.saveFile(name, mime, b64); } catch (e) { log.error("Native save failed", e); }
+    };
+    reader.readAsDataURL(blob);
+    return;
+  }
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
