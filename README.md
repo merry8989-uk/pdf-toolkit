@@ -166,6 +166,39 @@ The three methods for a PDF, at a glance:
 | Re-render at a DPI | No | 50–95% | When you know the resolution you want |
 | Hit a target size | No | Whatever is needed | Upload limits and email |
 
+## Android app
+
+There is a signed Android build in the releases:
+
+**https://github.com/merry8989-uk/pdf-toolkit/releases/latest**
+
+- Package: `io.osintgram.pdftoolkit` (permanent)
+- The whole site is bundled inside the APK (424 assets), so it runs with no
+  connection at all — not even a first load.
+- Served to the WebView through `WebViewAssetLoader` over
+  `https://appassets.androidplatform.net`, which is a real secure origin, so the
+  pdf.js and Tesseract workers and WebAssembly behave exactly as they do on the
+  website.
+- Produced files are written into the device's Downloads folder through a small
+  JS bridge, because a `blob:` download never reaches Android's downloader from
+  a WebView. In a browser that branch is skipped entirely.
+
+### Building
+
+CI builds and publishes on every tag:
+
+```bash
+git tag v1.0.1
+git push origin v1.0.1
+```
+
+or run the **Android release** workflow manually with a version number. The
+keystore lives in four encrypted repository secrets (`KEYSTORE_BASE64`,
+`KEYSTORE_PASSWORD`, `KEY_ALIAS`, `KEY_PASSWORD`) and is never committed. CI
+refuses to build if the keystore secret is missing, and verifies the finished
+APK with `apksigner` before publishing, so an unsigned build can never be
+released.
+
 ## Diagnostics log (Settings)
 
 The app keeps a local record of what it does so a problem can be diagnosed

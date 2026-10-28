@@ -833,10 +833,11 @@ function chrome(active) {
           <p class="foot-note">Install it like a native app, or download the whole thing and run it yourself — it is a static site.</p>
           <div class="row">
             <button class="btn sm" id="installApp" type="button" style="display:none">⬇ Install app</button>
+            <a class="btn ghost sm" href="https://github.com/merry8989-uk/pdf-toolkit/releases/latest" target="_blank" rel="noopener">📱 Android APK</a>
             <a class="btn ghost sm" href="https://github.com/merry8989-uk/pdf-toolkit/archive/refs/heads/main.zip" rel="noopener">⬇ Download source (.zip)</a>
             <a class="btn ghost sm" href="https://github.com/merry8989-uk/pdf-toolkit" target="_blank" rel="noopener">View on GitHub</a>
           </div>
-          <p class="foot-note" id="installHint">Installing adds an icon to your home screen and lets every tool run offline.</p>
+          <p class="foot-note" id="installHint">Installing adds an icon to your home screen and lets every tool run offline. The <b>Android APK</b> bundles the whole app, so it works with no connection at all.</p>
         </div>
         <div class="foot-col">
           <div class="foot-title">Suggest a feature</div>

@@ -1,7 +1,7 @@
 /* PDF Toolkit service worker — makes the app installable and usable offline.
    The shell is precached; every other same-origin file is cached as it is used,
    so the PDF/photo engines keep working after the first visit. */
-const CACHE = "pdf-toolkit-v9";
+const CACHE = "pdf-toolkit-v10";
 const SHELL = [
   "./",
   "./index.html",
